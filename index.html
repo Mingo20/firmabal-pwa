@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1A1D21">
+<title>FirmAbal — Captura territorial</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://js.puter.com/v2/"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1A1D21" stroke-width="1.8"><path d="M12 19l7-7-4-4-7 7-1.5 5.5L12 19z"/><path d="M18 13l-4-4"/><path d="M15 5l4 4"/></svg>
+    <span>FirmAbal</span>
+  </div>
+  <button id="btnShare" class="iconbtn" title="Auto registro">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1A1D21" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+  </button>
+</header>
+<main id="view"></main>
+<nav class="tabbar">
+  <button class="tab" data-v="dash" aria-label="Inicio"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></button>
+  <button class="tab" data-v="reg" aria-label="Registros"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.8 0 4.5 1.9 4.5 5"/></svg></button>
+  <button class="tab tab-cam" data-v="captura" aria-label="Capturar"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg></button>
+  <button class="tab" data-v="firmas" aria-label="Firmas"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7-4-4-7 7-1.5 5.5L12 19z"/><path d="M15 5l4 4"/></svg></button>
+  <button class="tab" data-v="menu" aria-label="Menú"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg></button>
+</nav>
+<div class="sheet-mask" id="sheetMask" hidden></div>
+<section class="sheet" id="autoSheet" hidden>
+  <div class="handle"></div>
+  <div class="sheet-head">
+    <div class="sheet-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div>
+    <div class="sheet-title"><h2>Auto registro</h2><p>Comparta para que el ciudadano se registre solo</p></div>
+    <button class="iconbtn" id="btnCloseSheet">✕</button>
+  </div>
+  <button class="btn btn-wa" id="btnWa">🟢 Compartir por WhatsApp</button>
+  <button class="btn btn-dark" id="btnCopy">🔗 Copiar enlace</button>
+  <p class="sheet-foot">El enlace queda asociado a usted como recolector responsable.</p>
+</section>
+<section class="sheet" id="menuSheet" hidden>
+  <div class="sheet-head" style="margin-bottom:6px"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#10131A" stroke-width="1.7"><path d="M12 19l7-7-4-4-7 7-1.5 5.5L12 19z"/><path d="M15 5l4 4"/></svg><div class="sheet-title"><h2>FirmAbal</h2></div><button class="iconbtn" id="btnCloseMenu">✕</button></div>
+  <div class="handle"></div>
+  <div class="menugrid" id="menuGrid"></div>
+</section>
+<div class="toast" id="toast"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
