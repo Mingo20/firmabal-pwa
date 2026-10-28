@@ -12,45 +12,49 @@
 <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
+<aside id="sidebar" class="sb">
+  <div class="sb-brand">
+    <img class="logo" src="icons/logo-96.png" width="34" height="34" alt="FirmAbal">
+    <span class="sb-name">FirmAbal</span>
+    <button class="iconbtn sb-toggle" id="btnSideToggle" title="Contraer"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+  </div>
+  <nav class="sb-links" id="sideLinks"></nav>
+  <div class="sb-foot"><span class="sb-name">v4 · prototipo</span></div>
+</aside>
+<div id="shell">
 <header class="topbar">
   <div class="brand">
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1A1D21" stroke-width="1.8"><path d="M12 19l7-7-4-4-7 7-1.5 5.5L12 19z"/><path d="M18 13l-4-4"/><path d="M15 5l4 4"/></svg>
+    <img class="logo" src="icons/logo-96.png" width="30" height="30" alt="FirmAbal">
     <span>FirmAbal</span>
   </div>
-  <button id="btnShare" class="iconbtn" title="Auto registro">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1A1D21" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-  </button>
+  <div class="tb-actions">
+    <button id="btnHelp" class="iconbtn" title="Ayuda"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1A1D21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.6 2.4c-.9.4-1.1 1-1.1 1.9"/><circle cx="12" cy="17" r=".4" fill="#1A1D21"/></svg></button>
+    <button id="btnShare" class="iconbtn" title="Auto registro"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1A1D21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.4l6.8 4M8.6 10.6l6.8-4"/></svg></button>
+  </div>
 </header>
 <main id="view"></main>
-<nav class="tabbar">
-  <button class="tab" data-v="dash" aria-label="Inicio"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></button>
-  <button class="tab" data-v="reg" aria-label="Registros"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.8 0 4.5 1.9 4.5 5"/></svg></button>
-  <button class="tab tab-cam" data-v="captura" aria-label="Capturar"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg></button>
-  <button class="tab" data-v="firmas" aria-label="Firmas"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7-4-4-7 7-1.5 5.5L12 19z"/><path d="M15 5l4 4"/></svg></button>
-  <button class="tab" data-v="menu" aria-label="Menú"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg></button>
-</nav>
+<nav class="tabbar" id="tabbar"></nav>
+</div>
 <div class="sheet-mask" id="sheetMask" hidden></div>
 <section class="sheet" id="autoSheet" hidden>
   <div class="handle"></div>
-  <div class="sheet-head">
-    <div class="sheet-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div>
-    <div class="sheet-title"><h2>Auto registro</h2><p>Comparta para que el ciudadano se registre solo</p></div>
-    <button class="iconbtn" id="btnCloseSheet">✕</button>
-  </div>
-  <button class="btn btn-wa" id="btnWa"><svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><path fill="#fff" d="M16 3C8.8 3 3 8.8 3 16c0 2.5.7 4.8 1.9 6.8L3 29l6.4-1.8A13 13 0 0 0 16 29c7.2 0 13-5.8 13-13S23.200 3 16 3zm0 23.700c-2 0-3.900-.6-5.600-1.600l-.4-.2-3.800 1.100 1-3.700-.3-.4A10.700 10.700 0 1 1 16 26.700zm5.900-8c-.3-.2-1.900-.9-2.200-1-.3-.1-.5-.2-.7.200-.2.300-.8 1-1 1.200-.2.200-.4.200-.7.100-.3-.2-1.400-.5-2.600-1.600-1-.9-1.600-1.900-1.800-2.200-.2-.3 0-.5.100-.7l.5-.5c.1-.2.200-.3.300-.5.100-.2.100-.4 0-.5l-1-2.300c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.100-.8.400-.3.300-1.100 1.100-1.100 2.600s1.100 3 1.300 3.200c.2.200 2.200 3.400 5.300 4.700 3.100 1.300 3.100.9 3.700.8.600-.1 1.900-.8 2.100-1.500.3-.7.300-1.400.2-1.500-.1-.2-.3-.3-.6-.4z"/></svg> Compartir por WhatsApp</button>
-  <button class="btn btn-dark" id="btnQr"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></svg> Código QR</button>
-  <p class="sheet-foot">El enlace queda asociado a usted como recolector responsable.</p>
+  <div class="sheet-head"><div class="sheet-ico"><img src="icons/logo-white-256.png" width="26" height="26" alt=""></div>
+  <div class="sheet-title"><h2>Auto registro</h2><p>Comparta para que el ciudadano se registre solo</p></div>
+  <button class="iconbtn" id="btnCloseSheet" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1A1D21" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="two"><button class="btn btn-wa" id="btnWa"><svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><path fill="#fff" d="M16 3C8.8 3 3 8.8 3 16c0 2.5.7 4.8 1.9 6.8L3 29l6.4-1.8A13 13 0 0 0 16 29c7.2 0 13-5.8 13-13S23.2 3 16 3zm0 23.7c-2 0-3.9-.6-5.6-1.6l-.4-.2-3.8 1.1 1-3.7-.3-.4A10.7 10.7 0 1 1 16 26.7zm5.9-8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.5c.1-.2.2-.3.3-.5.1-.2.1-.4 0-.5l-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.4 5.3 4.7 3.1 1.3 3.1.9 3.7.8.6-.1 1.9-.8 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg> WhatsApp</button><button class="btn btn-dark" id="btnQr"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></svg> Código QR</button></div>
+  <p class="sheet-foot">El enlace abre únicamente la pantalla de autorregistro y queda asociado a usted como promotor.</p>
 </section>
 <section class="sheet" id="qrSheet" hidden>
   <div class="handle"></div>
-  <div class="sheet-head"><div class="sheet-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></svg></div>
-  <div class="sheet-title"><h2>Código QR</h2><p>El ciudadano lo escanea para registrarse solo</p></div><button class="iconbtn" id="btnCloseQr">✕</button></div>
+  <div class="sheet-head"><div class="sheet-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></svg></div><div class="sheet-title"><h2>Código QR</h2><p>El ciudadano lo escanea para registrarse solo</p></div>
+  <button class="iconbtn" id="btnCloseQr" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1A1D21" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div id="qrBox" style="display:grid;place-items:center;padding:22px 0 8px"></div>
-  <button class="btn btn-light" id="btnQrBack">← Volver a Auto registro</button>
+  <button class="btn btn-light" id="btnQrBack">Volver a Auto registro</button>
 </section>
 <section class="sheet" id="menuSheet" hidden>
-  <div class="sheet-head" style="margin-bottom:6px"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#10131A" stroke-width="1.7"><path d="M12 19l7-7-4-4-7 7-1.5 5.5L12 19z"/><path d="M15 5l4 4"/></svg><div class="sheet-title"><h2>FirmAbal</h2></div><button class="iconbtn" id="btnCloseMenu">✕</button></div>
   <div class="handle"></div>
+  <div class="sheet-head" style="margin-bottom:10px"><img src="icons/logo-96.png" width="34" height="34" alt="FirmAbal"><div class="sheet-title"><h2>FirmAbal</h2></div>
+  <button class="iconbtn" id="btnCloseMenu" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1A1D21" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="menugrid" id="menuGrid"></div>
 </section>
 <div class="toast" id="toast"></div>
