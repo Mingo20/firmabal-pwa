@@ -1,4 +1,4 @@
-const CACHE='firmabal-v5';
+const CACHE='firmabal-v6';
 const ASSETS=['./','./index.html','./css/styles.css','./js/app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/logo-96.png','./icons/logo-white-256.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
