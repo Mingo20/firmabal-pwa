@@ -244,3 +244,61 @@ body.citizen{overflow:auto}#citz{min-height:100dvh;background:#FAFBFC}
 /* monitor: 3 KPIs debajo del mapa */
 .mkpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
 @media(min-width:900px){.filters{grid-template-columns:1fr 200px 220px}}
+
+/* ===== v7 ===== */
+/* 1) estado + reclutador lado a lado en movil */
+@media(max-width:899px){
+ .filters{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .filters>div:first-child{grid-column:1/-1}
+ .filters select{margin-top:0!important;height:46px!important;font-size:14px!important;padding:0 10px!important;border-radius:14px!important}
+}
+@media(min-width:900px){.filters{grid-template-columns:1fr 180px 200px}}
+/* 2) fila unica deslizable de 6 tarjetas en Monitor */
+.krow{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:2px 2px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.krow::-webkit-scrollbar{display:none}
+.kcard{flex:0 0 116px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:20px;padding:13px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.kcard.sm{flex:0 0 104px}
+.kcard.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.kcard.dark .kcard-l{color:#B9BFCC}
+.kcard.amber{background:#FFFBE6;border-color:#F8EBB4}.kcard.amber .kcard-l{color:#B4640B}
+.kcard .ico{width:34px;height:34px;border-radius:12px;background:#F1F2F5;display:grid;place-items:center;flex:0 0 auto}
+.kcard.dark .ico{background:rgba(255,255,255,.12)}
+.kcard.amber .ico{background:#FBF0C8}
+.kcard b{font-size:22px;font-weight:600;line-height:1}
+.kcard-l{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);line-height:1.25}
+/* 10) mapa de cobertura */
+.covwrap{position:relative;height:290px;border-radius:20px;overflow:hidden;border:1px solid var(--line)}
+@media(min-width:900px){.covwrap{height:360px}}
+.covwrap #covmap{width:100%;height:100%}
+.covbar{position:absolute;z-index:500;top:10px;left:10px;right:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}
+.covpill{pointer-events:auto;background:rgba(255,255,255,.96);border:1px solid #E1E4EA;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;color:#10131A;display:flex;gap:6px;align-items:center;box-shadow:0 2px 8px rgba(16,19,26,.08);cursor:pointer}
+.covpill.ghost{cursor:default}
+.covbub{background:#10131A;color:#fff;border-radius:999px;padding:6px 11px;font-size:13px;font-weight:700;display:flex;gap:6px;align-items:center;box-shadow:0 3px 10px rgba(16,19,26,.3);border:2px solid #fff;white-space:nowrap}
+.covbub span{font-weight:500;font-size:10.5px;opacity:.85;max-width:92px;overflow:hidden;text-overflow:ellipsis}
+.covbub.g{background:#0B9D6B;border-color:#DCF3E8}
+/* login recolector deslizable */
+.onbcard{max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+body.noscroll-fix{overflow:auto}
+html,body{overscroll-behavior-y:auto}
+/* mapa cobertura: ancho completo en PC y un poco mas alto que la grafica anterior */
+.covwrap{height:340px}
+@media(min-width:900px){.covwrap{height:420px}.pad>.card{width:100%}}
+.covwrap .leaflet-container{background:#EEF1F4;font-family:inherit}
+.covbub{transition:transform .18s ease}.covbub:hover{transform:scale(1.07)}
+.leaflet-marker-icon.leaflet-div-icon{background:none;border:0}
+
+/* ===== v7: tarjeta de instalacion ===== */
+.ib{position:fixed;left:12px;right:12px;top:12px;z-index:70;display:none;align-items:center;gap:12px;
+ background:#fff;border:1px solid #E7E9EE;border-radius:22px;padding:12px 14px;box-shadow:0 14px 40px rgba(16,19,26,.16);
+ transform:translateY(-140%);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .3s;touch-action:pan-x;will-change:transform}
+.ib.show{display:flex;transform:translateY(0)}
+.ib.out{transform:translateY(-160%);opacity:0}
+.ib-logo{border-radius:12px;flex:0 0 auto}
+.ib-txt{display:flex;flex-direction:column;min-width:0;flex:1}
+.ib-txt b{font-size:15.5px;letter-spacing:.01em}
+.ib-txt span{font-size:13px;color:#7A828F}
+.ib-btn{border:0;background:#10131A;color:#fff;font-family:inherit;font-size:14.5px;font-weight:600;
+ padding:11px 18px;border-radius:14px;cursor:pointer;flex:0 0 auto}
+.ib-x{border:0;background:#F1F2F5;color:#5B6270;width:32px;height:32px;border-radius:50%;font-size:18px;
+ line-height:1;cursor:pointer;flex:0 0 auto;display:grid;place-items:center;padding:0}
+@media(min-width:900px){.ib{left:auto;right:20px;top:76px;width:392px}}

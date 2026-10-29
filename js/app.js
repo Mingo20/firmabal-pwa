@@ -6,7 +6,9 @@ const db=JSON.parse(localStorage.getItem(KEY)||"null")||{meta:10,collector:{id:"
  {id:"R-1",nombre:"CARMEN CHALAS MENA",cedula:"224-0009987-9",nac:"1975-03-20",sexo:"F",lugar:"Santo Domingo",whatsapp:"8296469885",direccion:"San José casa 37",municipio:"Santo Domingo Oeste",distrito:"",sector:"Hato Nuevo",circ:"4",firma:null,estado:"verificado",fecha:Date.now()-86400000*3,rec:"REC-001",lat:18.4861,lng:-69.9712},
  {id:"R-2",nombre:"MIGUEL ANGEL GUERRA CHALAS",cedula:"402-2990201-2",nac:"1999-08-11",sexo:"M",lugar:"Santo Domingo",whatsapp:"8095550002",direccion:"Calle Principal 5",municipio:"Santo Domingo",distrito:"",sector:"Hato Nuevo",circ:"4",firma:null,estado:"pendiente",fecha:Date.now()-86400000*3,rec:"REC-001",lat:18.4722,lng:-69.9961}]};
 const ROLES={administrador:{n:"Administrador",d:"Acceso completo al sistema.",p:["capturar","consultar","cedula","telefono","firmas","modificar","eliminar","exportar","auditoria","configurar","usuarios","monitor"]},supervisor:{n:"Supervisor",d:"Consulta, revisión y supervisión de registros.",p:["capturar","consultar","cedula","telefono","firmas","modificar","exportar","monitor"]},recolector:{n:"Recolector",d:"Captura de registros y consulta mínima.",p:["capturar","consultar"]},auditor:{n:"Auditor",d:"Consulta de registros de auditoría.",p:["consultar","auditoria"]}};
-const MUNIS={"Distrito Nacional":["Santo Domingo de Guzmán","Los Alcarrizos"],"Santo Domingo":["Santo Domingo Este","Santo Domingo Oeste","Santo Domingo Norte","Boca Chica","San Antonio de Guerra","Pedro Brand","Los Alcarrizos"],"Santiago":["Santiago de los Caballeros","Villa Bisonó (Navarrete)","Licey al Medio","Sabana Iglesia","San José de Las Matas","Jánico","Tamboril","Puñal","Villa González","Baitoa"],"La Vega":["Concepción de La Vega","Jarabacoa","Constanza","Jima Abajo"],"San Cristóbal":["San Cristóbal","Cambita Garabitos","Villa Altagracia","Yaguate","San Gregorio de Nigua"],"Puerto Plata":["Puerto Plata","Sosúa","Altamira","Imbert","Villa Isabela","Los Hidalgos","Guananico","Maimón"],"La Altagracia":["Higüey","San Rafael del Yuma"],"San Pedro de Macorís":["San Pedro de Macorís","Consuelo","Quisqueya","Ramón Santana","San José de los Llanos"],"Duarte":["San Francisco de Macorís","Las Guáranas","Villa Riva","Pimentel","Castillo","Eugenio María de Hostos"],"Espaillat":["Moca","Cayetano Germosén","Gaspar Hernández","Jamao al Norte"],"La Romana":["La Romana","Guaymate","Villa Hermosa"],"Azua":["Azua de Compostela","Las Charcas","Las Yayas de Viajama","Peralta","Sabana Yegua","Pueblo Viejo","Guayabal","Tábara Arriba"],"Barahona":["Barahona","Cabral","Enriquillo","Paraíso","Polo","Vicente Noble","Fundación","La Ciénaga","El Peñón"],"Monseñor Nouel":["Bonao","Maimón","Piedra Blanca"],"Peravia":["Baní","Nizao"],"Valverde":["Mao","Esperanza","Laguna Salina"],"Otra":["Otro"]};
+const GEO={"Distrito Nacional":[18.4861,-69.9312,{"Santo Domingo de Guzmán":[18.4861,-69.9312]}],"Santo Domingo":[18.5,-69.85,{"Santo Domingo Este":[18.4885,-69.857],"Santo Domingo Oeste":[18.495,-70.018],"Santo Domingo Norte":[18.556,-69.91],"Boca Chica":[18.4497,-69.6061],"San Antonio de Guerra":[18.543,-69.699],"Pedro Brand":[18.583,-70.099],"Los Alcarrizos":[18.508,-70.017]}],"Santiago":[19.45,-70.69,{"Santiago de los Caballeros":[19.4517,-70.697],"Villa Bisonó (Navarrete)":[19.56,-70.88],"Licey al Medio":[19.392,-70.593],"Tamboril":[19.48,-70.61],"Jánico":[19.319,-70.833],"Puñal":[19.383,-70.787],"Villa González":[19.5,-70.8]}],"La Vega":[19.22,-70.53,{"La Vega":[19.221,-70.529],"Jarabacoa":[19.117,-70.636],"Constanza":[18.909,-70.745]}],"San Cristóbal":[18.42,-70.11,{"San Cristóbal":[18.418,-70.109],"Villa Altagracia":[18.67,-70.169],"Bajos de Haina":[18.417,-70.035],"Yaguate":[18.335,-70.2]}],"Puerto Plata":[19.79,-70.69,{"Puerto Plata":[19.7934,-70.6884],"Sosúa":[19.75,-70.517],"Imbert":[19.75,-70.82]}],"La Altagracia":[18.58,-68.4,{"Higüey":[18.615,-68.708],"Punta Cana (Verón)":[18.582,-68.405],"San Rafael del Yuma":[18.425,-68.669]}],"San Pedro de Macorís":[18.46,-69.3,{"San Pedro de Macorís":[18.4539,-69.3086],"Consuelo":[18.57,-69.29]}],"Duarte":[19.3,-70.25,{"San Francisco de Macorís":[19.3009,-70.2528],"Pimentel":[19.206,-70.297]}],"Espaillat":[19.62,-70.39,{"Moca":[19.394,-70.526],"Gaspar Hernández":[19.627,-70.281]}],"La Romana":[18.43,-68.97,{"La Romana":[18.4273,-68.9728]}],"Azua":[18.45,-70.73,{"Azua de Compostela":[18.453,-70.734]}],"Barahona":[18.21,-71.1,{"Barahona":[18.2085,-71.1008]}],"Monseñor Nouel":[18.92,-70.4,{"Bonao":[18.936,-70.409]}],"Peravia":[18.28,-70.33,{"Baní":[18.279,-70.331]}],"Valverde":[19.59,-70.98,{"Mao":[19.552,-70.987]}],"Monte Cristi":[19.85,-71.64,{"Monte Cristi":[19.849,-71.646]}],"Dajabón":[19.55,-71.7,{"Dajabón":[19.5499,-71.7088]}],"Santiago Rodríguez":[19.47,-71.34,{"San Ignacio de Sabaneta":[19.478,-71.344]}],"María Trinidad Sánchez":[19.38,-69.85,{"Nagua":[19.383,-69.847]}],"Samaná":[19.2,-69.34,{"Samaná":[19.2056,-69.3364]}],"Hermanas Mirabal":[19.37,-70.38,{"Salcedo":[19.377,-70.417]}],"Sánchez Ramírez":[19.05,-70.15,{"Cotuí":[19.052,-70.15]}],"Monte Plata":[18.81,-69.79,{"Monte Plata":[18.808,-69.785]}],"Hato Mayor":[18.76,-69.25,{"Hato Mayor del Rey":[18.763,-69.257]}],"El Seibo":[18.77,-69.04,{"El Seibo":[18.765,-69.039]}],"San Juan":[18.81,-71.23,{"San Juan de la Maguana":[18.806,-71.23]}],"Elías Piña":[18.88,-71.7,{"Comendador":[18.876,-71.705]}],"Independencia":[18.48,-71.85,{"Jimaní":[18.498,-71.85]}],"Bahoruco":[18.48,-71.42,{"Neiba":[18.481,-71.419]}],"Pedernales":[18.04,-71.74,{"Pedernales":[18.038,-71.744]}],"San José de Ocoa":[18.54,-70.5,{"San José de Ocoa":[18.546,-70.504]}]};
+const MUNIS=Object.fromEntries(Object.entries(GEO).map(([p,v])=>[p,Object.keys(v[2])]));
+const PROVS=Object.keys(MUNIS);
 db.users=db.users||[{id:"U-1",nombre:db.collector.name,rol:"administrador",whatsapp:"8296469885",provincia:"Santo Domingo",municipio:"Santo Domingo Oeste",activo:true}];
 db.org=db.org||"FirmAbal";db.ses=db.ses||"U-1";db.audit=db.audit||[{t:Date.now()-86400000*2,u:db.collector.name,a:"Creación de registro",reg:"R-1",det:"Cédula 224-0009987-9",ok:true},{t:Date.now()-86400000*2,u:db.collector.name,a:"Creación de registro",reg:"R-2",det:"Cédula 402-2990201-2",ok:true},{t:Date.now()-86400000,u:db.collector.name,a:"Cambio de permisos / config",reg:"—",det:"Permisos rol administrador",ok:true}];
 db.me=db.me||"U-1";
@@ -52,7 +54,6 @@ function dyn(html,build){const w=document.createElement("div");w.innerHTML=html;
  requestAnimationFrame(()=>{mask.classList.add("show");sh.classList.add("show")});
  const close=()=>{sh.classList.remove("show");mask.classList.remove("show");setTimeout(()=>w.remove(),430)};
  mask.onclick=close;const x=w.querySelector("[data-x]");if(x)x.onclick=close;build&&build(w,close);return close}
-$("#btnShare").onclick=()=>sheet(true);$("#btnCloseSheet").onclick=()=>sheet(false);$("#btnCloseSheet").innerHTML=XI;$("#btnCloseQr").innerHTML=XI;
 $("#btnWa").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent("Hola, puede completar su autorregistro desde su celular, solo necesita su cédula: "+shareLink()),"_blank");
 $("#btnQr").onclick=()=>{closeS($("#autoSheet"),()=>{const b=$("#qrBox");b.innerHTML="";try{new QRCode(b,{text:shareLink(),width:230,height:230,colorDark:"#10131A",colorLight:"#ffffff"})}catch{b.innerHTML="<p class='sub'>No se pudo generar el QR sin conexión.</p>"}openS($("#qrSheet"))})};
 $("#btnCloseQr").onclick=()=>closeS($("#qrSheet"));
@@ -71,9 +72,41 @@ audit:{t:"Auditoría",d:"Bitácora de eventos y revisión de firmas.",p:["La tab
 export:{t:"Exportación",d:"Descarga de expedientes y datos.",p:["PDF de todos los expedientes: un documento ordenado por afiliado.","CSV de registros: datos en hoja de cálculo."]},
 config:{t:"Configuración",d:"Su perfil y los accesos del equipo.",p:["Actualice su foto, nombre, WhatsApp, provincia y municipio.","Roles y permisos muestra qué puede hacer cada rol.","El administrador asigna roles y activa o suspende reclutadores."]}
 };
-function ayuda(){const h=HELP[cur]||HELP.dash;dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:88vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.500 9.200a2.600 2.600 0 1 1 3.600 2.400c-.9.4-1.100 1-1.100 1.900"/></svg></div><div class="sheet-title"><h2>${h.t}</h2><p>${h.d}</p></div><button class="iconbtn" data-x>${XI}</button></div>
+function ayuda(){const h=HELP[cur]||HELP.dash;dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:88vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-title"><h2>${h.t}</h2><p>${h.d}</p></div><button class="iconbtn" data-x>${XI}</button></div>
  <div class="help-box" style="margin-top:14px"><div class="help-sec" style="margin:0"><h4>Cómo usar esta pantalla</h4><ol style="padding-left:20px;margin:8px 0 0">${h.p.map(x=>`<li>${x}</li>`).join("")}</ol></div></div></section>`)}
 $("#btnHelp").onclick=ayuda;
+
+/* ---- Tarjeta de instalacion (solo navegador) ---- */
+let ibPrompt=null,ibTimer=null;
+const ibStandalone=()=>{try{return !!(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true}catch(e){return false}};
+function ibHide(permanent){
+ const el=$("#installBar");if(!el)return;
+ el.classList.add("out");setTimeout(()=>el.classList.remove("show","out"),420);
+ if(permanent){try{sessionStorage.setItem("firmabal-ib","off")}catch(e){}}
+}
+function ibShow(){
+ const el=$("#installBar");if(!el||ibStandalone())return;
+ try{if(sessionStorage.getItem("firmabal-ib")==="off")return}catch(e){}
+ el.classList.add("show");ibTimer=setTimeout(()=>el.classList.add("show"),10);
+ /* deslizar a los lados para ocultar */
+ let x0=null;
+ el.addEventListener("touchstart",e=>{x0=e.touches[0].clientX},{passive:true});
+ el.addEventListener("touchmove",e=>{if(x0===null)return;const dx=e.touches[0].clientX-x0;
+  if(Math.abs(dx)>8){el.style.transform="translate("+dx+"px,"+(Math.abs(dx)>120?"-120%":0)+"px)";el.style.opacity=String(Math.max(0,1-Math.abs(dx)/260))}},{passive:true});
+ el.addEventListener("touchend",e=>{const dx=(e.changedTouches[0].clientX-(x0||0));x0=null;
+  if(Math.abs(dx)>70){el.style.transform="";el.style.opacity="";ibHide(true)}else{el.style.transform="";el.style.opacity=""}},{passive:true});
+ const x=$("#ibX");if(x)x.onclick=()=>ibHide(true);
+ const go=$("#ibGo");if(go)go.onclick=async()=>{
+  if(ibPrompt){ibPrompt.prompt();const r=await ibPrompt.userChoice.catch(()=>({outcome:"dismissed"}));
+   ibPrompt=null;if(r&&r.outcome==="accepted"){ibHide(true);return}toast("Instalación cancelada");return}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  toast(ios?"En Safari: Compartir → Añadir a pantalla de inicio":"Use el menú del navegador → Instalar aplicación");
+ };
+}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();ibPrompt=e;ibShow()});
+window.addEventListener("appinstalled",()=>ibHide(true));
+if(document.readyState!=="loading")setTimeout(ibShow,1200);else window.addEventListener("load",()=>setTimeout(ibShow,1200));
+
 /* ---- Navegación ---- */
 const TABS=[["dash","Inicio"],["reg","Registros"],["captura","Captura"],["firmas","Firmas"],["menu","Menú"]];
 $("#tabbar").innerHTML=TABS.map(([k,l])=>k==="captura"?`<button class="tab tab-cam" data-v="captura" aria-label="${l}">${ico("captura",30,1.9,"#fff")}</button>`:k==="menu"?`<button class="tab" data-v="menu" aria-label="${l}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.700" y="3.700" width="6.600" height="6.600" rx="2"/><rect x="13.700" y="3.700" width="6.600" height="6.600" rx="2"/><rect x="3.700" y="13.700" width="6.600" height="6.600" rx="2"/><rect x="13.700" y="13.700" width="6.600" height="6.600" rx="2"/></svg></button>`:`<button class="tab" data-v="${k}" aria-label="${l}">${ico(k,26)}</button>`).join("");
@@ -82,11 +115,11 @@ const sbKey="firmabal-sb";let sbOpen=localStorage.getItem(sbKey)!=="0";
 const applySb=()=>{document.body.classList.toggle("sb-collapsed",!sbOpen);$("#btnSideToggle").innerHTML=`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${sbOpen?"M15 6l-6 6 6 6":"M9 6l6 6-6 6"}"/></svg>`;$("#btnSideToggle").title=sbOpen?"Contraer":"Desplegar"};
 $("#btnSideToggle").onclick=()=>{sbOpen=!sbOpen;localStorage.setItem(sbKey,sbOpen?"1":"0");applySb()};applySb();
 const menuSheet=show=>{if(!show)return closeS($("#menuSheet"));{$("#menuGrid").innerHTML=MENU.filter(m=>can(m[0])).map(([k,l])=>`<button data-go="${k}" class="${cur===k?"on":""}">${ico(k,30,1.6,"#2B2F38")}${l}</button>`).join("");$$("[data-go]").forEach(b=>b.onclick=()=>{closeS($("#menuSheet"),()=>go(b.dataset.go))});openS($("#menuSheet"))}};
-const PROVS=Object.keys(MUNIS);
+$("#btnShare").onclick=()=>sheet(true);
+let navBusy=false;
 $("#btnCloseMenu").onclick=()=>menuSheet(false);$("#btnCloseMenu").innerHTML=XI;
 $("#sheetMask").onclick=closeAll;
 $$(".tab,.sb-link").forEach(b=>b.onclick=()=>b.dataset.v==="menu"?menuSheet(true):go(b.dataset.v));
-let navBusy=false;
 function go(v){if(navBusy)return;navBusy=true;const bar=document.querySelector(".pagebar")||(()=>{const b=document.createElement("div");b.className="pagebar";document.body.appendChild(b);return b})();
  bar.style.opacity=1;bar.classList.remove("go");void bar.offsetWidth;bar.classList.add("go");view.classList.add("out");
  setTimeout(()=>{goNow(v);view.classList.remove("out");view.classList.remove("in");void view.offsetWidth;view.classList.add("in");setTimeout(()=>{bar.style.opacity=0;setTimeout(()=>{bar.classList.remove("go");bar.style.width=0},200);navBusy=false},500)},280)}
@@ -94,11 +127,41 @@ function goNow(v){if(!can(v)){toast("Su rol no tiene acceso a esta pantalla");re
  ({dash:vDash,equipo:vEquipo,monitor:vEquipo,terr:vTerr,recol:vRecol,captura:vCaptura,reg:vReg,firmas:vFirmas,audit:vAdmin,export:vExport,config:vConfig})[v]();view.scrollTop=0}
 
 /* ---- Centro de control ---- */
-function vDash(){const s=stats();
+/* ---- Mapa de cobertura nacional: provincia > municipio > distrito/sector ---- */
+let covMap=null,covLv={p:null,m:null};
+const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+function provDe(r){if(r.provincia&&GEO[r.provincia])return r.provincia;const m=norm(r.municipio);if(!m)return null;for(const [p,v] of Object.entries(GEO)){if(norm(p)===m)return p;for(const mu of Object.keys(v[2])){const n=norm(mu);if(n===m||m.includes(n)||(n.includes(m)&&m.length>5))return p}}return null}
+function munDe(r,p){const m=norm(r.municipio);if(!p||!GEO[p]||!m)return null;for(const mu of Object.keys(GEO[p][2])){const n=norm(mu);if(n===m||m.includes(n)||(n.includes(m)&&m.length>5))return mu}return null}
+function covData(){const P={};let sinUbic=0;db.records.forEach(r=>{const p=provDe(r);if(!p){sinUbic++;return}
+  const m=munDe(r,p)||"(otro municipio)";const area=((r.distrito||"").trim())||((r.sector||"").trim())||"Sin sector";
+  P[p]=P[p]||{n:0,M:{}};P[p].n++;P[p].M[m]=P[p].M[m]||{n:0,S:{}};P[p].M[m].n++;P[p].M[m].S[area]=(P[p].M[m].S[area]||0)+1});return {P,sinUbic}}
+function vCov(){const w=document.getElementById("covmap");if(!w)return;
+ if(covMap){covMap.remove();covMap=null}
+ covMap=L.map("covmap",{zoomControl:false,attributionControl:false,scrollWheelZoom:false,zoomSnap:.25}).setView([18.95,-70.35],7.2);
+ L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:19}).addTo(covMap);
+ L.control.zoom({position:"bottomright"}).addTo(covMap);
+ const layer=L.layerGroup().addTo(covMap);const bar=document.getElementById("covbar");
+ const bub=(pos,n,label,cls,fn)=>{const h=`<div class="covbub ${cls||""}">${n}<span>${esc(label)}</span></div>`;const mk=L.marker(pos,{icon:L.divIcon({className:"",html:h,iconSize:null,iconAnchor:[20,14]})}).addTo(layer);if(fn)mk.on("click",fn);return mk};
+ const draw=()=>{layer.clearLayers();const {P,sinUbic}=covData();const tot=db.records.length;
+  const crumbs=[`<button class="covpill" data-lv="n">Nacional · ${tot}</button>`];
+  if(covLv.p)crumbs.push(`<button class="covpill" data-lv="p">${esc(covLv.p)} · ${(P[covLv.p]||{n:0}).n}</button>`);
+  if(covLv.m)crumbs.push(`<span class="covpill ghost">${esc(covLv.m)} · ${((P[covLv.p]||{M:{}}).M[covLv.m]||{n:0}).n}</span>`);
+  bar.innerHTML=crumbs.join("")+(sinUbic&&!covLv.p?`<span class="covpill ghost" title="Registros cuyo municipio no pudo ubicarse">Sin ubicar · ${sinUbic}</span>`:"");
+  $$("[data-lv]",bar).forEach(b=>b.onclick=()=>{if(b.dataset.lv==="n"){covLv={p:null,m:null};covMap.flyTo([18.95,-70.35],7.2,{duration:.9})}else{covLv.m=null;const g=GEO[covLv.p];covMap.flyTo([g[0],g[1]],10,{duration:.9})}draw()});
+  if(!covLv.p){Object.entries(P).forEach(([p,d])=>{const g=GEO[p];bub([g[0],g[1]],d.n,p,"",()=>{covLv.p=p;covMap.flyTo([g[0],g[1]],10,{duration:.9});draw()})});
+   if(!Object.keys(P).length)bub([18.95,-70.35],0,"Sin registros ubicados","g")}
+  else if(!covLv.m){const g=GEO[covLv.p],d=P[covLv.p]||{M:{}};Object.entries(d.M).forEach(([m,v],i)=>{const c=g[2][m]||[g[0]+Math.sin(i*2.4)*.05,g[1]+Math.cos(i*2.4)*.05];bub(c,v.n,m,"g",()=>{covLv.m=m;covMap.flyTo(c,12.5,{duration:.9});draw()})})}
+  else{const g=GEO[covLv.p],c=g[2][covLv.m]||[g[0],g[1]],S=((P[covLv.p]||{M:{}}).M[covLv.m]||{S:{}}).S;const ks=Object.keys(S);
+   ks.forEach((s,i)=>{const a=(i/Math.max(1,ks.length))*Math.PI*2,rad=ks.length>1?.012:0;bub([c[0]+Math.sin(a)*rad,c[1]+Math.cos(a)*rad*1.1],S[s],s,"g")})}};
+ draw();setTimeout(()=>covMap.invalidateSize(),250)}
+
+function vDash(){const s=stats();covLv={p:null,m:null};setTimeout(vCov,60);
  view.innerHTML=`<div class="pad"><div class="grid"><div class="stat dark"><small>Totales</small><b>${s.total}</b></div><div class="stat"><small>Capturados hoy</small><b>${s.hoy}</b></div>
  <div class="stat amber"><small>Pendientes</small><b>${s.pen}</b></div><div class="stat red"><small>Duplicados</small><b>${s.dup}</b></div>
  <div class="stat"><small>Auto registros</small><b>${s.auto}</b></div><div class="stat"><small>Recolectores</small><b>${db.users.filter(u=>u.activo).length}</b></div></div>
- <div class="card" style="padding:22px 18px 16px"><div style="display:flex;gap:10px;align-items:center;font-size:16px;font-weight:600"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#10131A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18.500l5-5.500 3.500 3.500L20 8"/><path d="M15 8h5v5"/></svg>Registros por día (últimos 7)</div>${chart()}</div></div>`}
+ <div class="card" style="padding:18px 16px 16px"><div style="display:flex;gap:10px;align-items:center;font-size:16px;font-weight:600;margin-bottom:12px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#10131A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L3.5 6.8v12.7L9 17.2l6 2.3 5.5-2.3V4.5L15 6.8z"/><path d="M9 4.5v12.7M15 6.8v12.7"/></svg>Cobertura nacional</div>
+ <div class="covwrap"><div id="covmap"></div><div class="covbar" id="covbar"></div></div></div></div>`}
+
 function chart(){const d=last7().filter(x=>x.n>0).length?last7().filter(x=>x.n>0):last7().slice(-1);const mx=Math.max(2,...d.map(x=>x.n));const ticks=[mx,mx*.75,mx/2,mx/4,0].map(v=>Math.round(v*10)/10);
  return `<div style="display:flex;margin-top:18px;height:340px;position:relative"><div style="display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding-right:14px;color:#8A909C;font-size:15px;height:300px">${ticks.map(t=>`<span>${t}</span>`).join("")}</div>
  <div style="flex:1;position:relative;height:300px;border-bottom:1px solid #EDEFF3"><div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between">${ticks.map(()=>'<i style="border-top:1px dashed #E7E9EE;display:block"></i>').join("")}</div>
@@ -109,12 +172,14 @@ function last7(){const o=[];for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*
 /* ---- Equipo / mapa ---- */
 function vEquipo(){const s=stats();const live=!!db.collector.sharing;
  view.innerHTML=`<div class="mapwrap"><div id="map"></div></div>
- <div class="mkpis"><div class="stat dark"><small>Cobertura</small><b>${new Set(db.records.map(r=>(r.municipio||"")+"|"+(r.sector||""))).size}</b><small style="color:#B9BFCC;letter-spacing:.06em;font-size:11px;margin-top:2px">sectores</small></div>
- <div class="stat"><small>Promedio hoy</small><b>${db.users.filter(u=>u.activo).length?Math.round(s.hoy/Math.max(1,db.users.filter(u=>u.activo).length)*10)/10:0}</b><small style="color:#8A909C;letter-spacing:.06em;font-size:11px;margin-top:2px">por recolector</small></div>
- <div class="stat amber"><small>Por validar</small><b>${s.pen}</b><small style="color:#B4640B;letter-spacing:.06em;font-size:11px;margin-top:2px">pendientes</small></div></div>
- <div class="chips"><div class="chip">${ico("recol",26,1.7)}<b>${db.users.filter(u=>u.activo).length}</b><span>Recolectores activos</span></div>
- <div class="chip">${ico("monitor",26,1.7)}<b>${live?1:0}</b><span>Compartiendo ubicación</span></div>
- <div class="chip">${ico("firmas",26,1.7)}<b>${s.total}</b><span>Registros</span></div></div>
+ <div class="krow">
+  <div class="kcard"><div class="ico">${ico("recol",20,1.8)}</div><b>${db.users.filter(u=>u.activo).length}</b><span class="kcard-l">Recolectores activos</span></div>
+  <div class="kcard"><div class="ico">${ico("monitor",20,1.8)}</div><b>${live?1:0}</b><span class="kcard-l">Compartiendo ubicación</span></div>
+  <div class="kcard"><div class="ico">${ico("firmas",20,1.8)}</div><b>${s.total}</b><span class="kcard-l">Registros</span></div>
+  <div class="kcard dark"><div class="ico">${ico("terr",20,1.8,"#fff")}</div><b>${new Set(db.records.map(r=>(r.municipio||"")+"|"+(r.sector||""))).size}</b><span class="kcard-l">Sectores cubiertos</span></div>
+  <div class="kcard"><div class="ico">${ico("dash",20,1.8)}</div><b>${db.users.filter(u=>u.activo).length?Math.round(s.hoy/Math.max(1,db.users.filter(u=>u.activo).length)*10)/10:0}</b><span class="kcard-l">Promedio por recolector</span></div>
+  <div class="kcard amber"><div class="ico">${ico("audit",20,"1.8","#B4640B")}</div><b style="color:#B4640B">${s.pen}</b><span class="kcard-l">Por validar</span></div>
+ </div>
  <button class="fab ${live?"live":""}" id="shareLoc" title="${live?"Dejar de compartir ubicación":"Compartir mi ubicación en vivo"}" aria-label="Ubicación en vivo"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.500-5.700-6.500-10.800a6.500 6.500 0 0 1 13 0C18.500 15.300 12 21 12 21z"/><circle cx="12" cy="10.200" r="2.400"/></svg></button>`;
  map=L.map("map",{zoomControl:true}).setView([18.4861,-69.9312],11);
  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(map);
@@ -163,14 +228,14 @@ function pdfExpediente(r){if(!window.jspdf)return toast("Cargando exportador, in
 
 /* ---- Territorios ---- */
 function vTerr(){const g={};db.records.forEach(r=>{const k=r.municipio+" · "+r.sector+" · Circ. "+r.circ;g[k]=(g[k]||0)+1});
- view.innerHTML=`<div class="pad"><div class="tgrid">${Object.entries(g).map(([k,n])=>`<div class="item terr-item" data-terr="${esc(k)}" style="gap:14px;padding:16px"><div style="width:46px;height:46px;border-radius:14px;background:#F1F2F5;display:grid;place-items:center;flex:0 0 auto;color:#10131A">${ico("terr",24,1.7)}</div><div style="flex:1;min-width:0"><b style="font-size:16px;overflow-wrap:anywhere">${esc(k)}</b><small>${n} afiliado(s)</small></div><span class="pill ok">${n}</span></div>`).join("")||"<p class='sub'>Sin datos aún.</p>"}</div></div>`}
+ view.innerHTML=`<div class="pad"><div class="tgrid">${Object.entries(g).map(([k,n])=>`<div class="item terr-item" data-terr="${esc(k)}" style="gap:14px;padding:16px"><div style="flex:1;min-width:0"><b style="font-size:16px;overflow-wrap:anywhere">${esc(k)}</b><small>${n} afiliado(s)</small></div><span class="pill ok">${n}</span></div>`).join("")||"<p class='sub'>Sin datos aún.</p>"}</div></div>`}
 
 function terrDetalle(k){
  const rs=db.records.filter(r=>((r.municipio+" · "+r.sector+" · Circ. "+r.circ)===k));
  const tot=rs.length,val=rs.filter(r=>r.estado==="verificado").length,pen=rs.filter(r=>r.estado==="pendiente").length,dup=rs.filter(r=>r.estado==="duplicado").length;
  const recs={};rs.forEach(r=>{const n=recName(r);recs[n]=(recs[n]||0)+1});
  const wa=rs.filter(r=>r.whatsapp).length;
- dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-width:520px;max-height:90vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-ico">${ico("terr",22,1.8,"#fff")}</div><div class="sheet-title"><h2 style="font-size:18px">${esc(k)}</h2><p>Detalle del territorio</p></div><button class="iconbtn" data-x>${XI}</button></div>
+ dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-width:520px;max-height:90vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-title"><h2 style="font-size:18px">${esc(k)}</h2><p>Detalle del territorio</p></div><button class="iconbtn" data-x>${XI}</button></div>
  <div class="mkpis" style="margin-top:14px"><div class="stat dark"><small>Registros</small><b>${tot}</b></div><div class="stat"><small>Validados</small><b>${val}</b></div><div class="stat amber"><small>Pendientes</small><b>${pen}</b></div></div>
  <div class="card" style="margin-top:14px"><div class="kv"><span>Cobertura validada</span><b>${tot?Math.round(val/tot*100):0}%</b></div><div class="kv"><span>Duplicados</span><b>${dup}</b></div><div class="kv"><span>Con WhatsApp</span><b>${wa} de ${tot}</b></div><div class="kv"><span>Reclutadores activos</span><b>${Object.keys(recs).length}</b></div></div>
  <div class="card" style="margin-top:12px"><b style="font-size:16px">Aportes por reclutador</b>${Object.entries(recs).map(([n,c])=>`<div class="kv"><span>${esc(n)}</span><b>${c}</b></div>`).join("")||"<p class='sub'>Sin datos.</p>"}</div>
@@ -181,16 +246,23 @@ document.addEventListener("click",e=>{const t=e.target.closest(".terr-item");if(
 const avt=(u,s=56)=>`<div style="width:${s}px;height:${s}px;border-radius:50%;background:#10131A;color:#fff;display:grid;place-items:center;font-size:${Math.round(s*.4)}px;font-weight:600;overflow:hidden;flex:0 0 auto">${u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover">`:esc((u.nombre||"?")[0].toUpperCase())}</div>`;
 const nReg=u=>db.records.filter(r=>r.rec===u.id||(u.id==="U-1"&&r.rec==="REC-001")).length;
 function vRecol(){view.innerHTML=`<div class="pad"><div class="agrid">${db.users.map(u=>`<div class="card" data-uid="${u.id}" style="margin:0;display:flex;gap:14px;align-items:center;cursor:pointer;padding:16px;min-width:0">${avt(u)}<div style="min-width:0;flex:1"><b style="font-size:16px;overflow-wrap:anywhere">${esc(u.nombre)}</b><div style="color:#8A909C;font-size:13px;margin-top:3px">${ROLES[u.rol].n} · ${nReg(u)} firmas</div><span class="chipx" style="margin-top:8px;display:inline-block;${u.activo?"background:#E3F7EE;border-color:#BFEBD6;color:#0A7A52":"background:#FCE9E8;border-color:#F6CFCC;color:#B3261E"}">${u.activo?"Activo":"Suspendido"}</span></div></div>`).join("")}</div></div>
- <button class="fab" id="fabAdd" aria-label="Agregar reclutador"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`;
+ <button class="fab" id="fabAdd" aria-label="Agregar recolector"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`;
  $$("[data-uid]").forEach(c=>c.onclick=()=>reclutador(c.dataset.uid));$("#fabAdd").onclick=nuevoReclutador}
 function munisFor(p,sel){const s=$("#nm");if(!s)return;s.innerHTML='<option value="">Seleccione</option>'+(MUNIS[p]||[]).map(m=>`<option ${m===sel?"selected":""}>${m}</option>`).join("")}
-function nuevoReclutador(){dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:92vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-ico">${ico("recol",22,1.8,"#fff")}</div><div class="sheet-title"><h2>Nuevo reclutador</h2><p>Agregue sus datos y asigne un rol</p></div><button class="iconbtn" data-x>${XI}</button></div>
- <label>Nombre</label><input type="text" id="nn"><label>WhatsApp</label><input type="tel" id="nw" inputmode="tel" placeholder="809-000-0000"><label>Provincia</label><select id="np"><option value="">Seleccione</option>${PROVS.map(p=>`<option>${p}</option>`).join("")}</select><label>Municipio</label><select id="nm"><option value="">Seleccione</option></select><label>Rol</label><select id="nr">${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${k==="recolector"?"selected":""}>${r.n}</option>`).join("")}</select>
- <button class="btn btn-dark" id="ns" style="margin-top:18px">Agregar reclutador</button></section>`,(w,close)=>{munisFor($("#np",w).value);$("#np",w).onchange=e=>munisFor(e.target.value);$("#ns",w).onclick=()=>{const n=$("#nn",w).value.trim(),wa=$("#nw",w).value.replace(/\D/g,"");if(!n)return toast("Escriba el nombre");if(wa.length<10)return toast("WhatsApp inválido (10 dígitos)");
-  const id="U-"+(db.users.length+1);db.users.push({id,nombre:n,rol:$("#nr",w).value,whatsapp:wa,provincia:$("#np",w).value,municipio:$("#nm",w).value.trim(),nuevo:true,activo:true});logA("Cambio de permisos / config",id,"Alta de reclutador "+n);toast("Reclutador agregado");close();setTimeout(vRecol,420)}})}
+function nuevoReclutador(){dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:92vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-title"><h2>Nuevo recolector</h2><p>Todos los campos son obligatorios</p></div><button class="iconbtn" data-x>${XI}</button></div>
+ <label>Nombre *</label><input type="text" id="nn" autocomplete="off"><label>WhatsApp *</label><input type="tel" id="nw" inputmode="tel" placeholder="809-000-0000"><label>Cédula de identidad *</label><input type="text" id="nc" inputmode="numeric" maxlength="13" placeholder="000-0000000-0"><label>Provincia *</label><select id="np"><option value="">Seleccione</option>${PROVS.map(p=>`<option>${p}</option>`).join("")}</select><label>Municipio *</label><select id="nm"><option value="">Seleccione</option></select><label>Rol *</label><select id="nr"><option value="">Seleccione</option>${Object.entries(ROLES).map(([k,r])=>`<option value="${k}">${r.n}</option>`).join("")}</select>
+ <button class="btn btn-dark" id="ns" style="margin-top:18px">Agregar recolector</button></section>`,(w,close)=>{munisFor($("#np",w).value);$("#np",w).onchange=e=>munisFor(e.target.value);
+  const fmtC=s=>{const d=s.replace(/\D/g,"").slice(0,11);return d.length>10?d.slice(0,3)+"-"+d.slice(3,10)+"-"+d.slice(10):d.length>3?d.slice(0,3)+"-"+d.slice(3):d};
+  $("#nc",w).oninput=e=>{e.target.value=fmtC(e.target.value)};
+  $("#ns",w).onclick=()=>{const n=$("#nn",w).value.trim(),wa=$("#nw",w).value.replace(/\D/g,""),ce=$("#nc",w).value.replace(/\D/g,""),pv=$("#np",w).value,mn=$("#nm",w).value,rl=$("#nr",w).value;
+   const bad=[["nn",!n],["nw",wa.length<10],["nc",ce.length!==11],["np",!pv],["nm",!mn],["nr",!rl]];
+   bad.forEach(([id,e])=>{$("#"+id,w).style.borderColor=e?"#B3261E":"";$("#"+id,w).style.background=e?"#FFF1F0":""});
+   if(!n)return toast("Escriba el nombre");if(wa.length<10)return toast("WhatsApp inválido (10 dígitos)");if(ce.length!==11)return toast("La cédula debe tener 11 dígitos");if(!pv)return toast("Seleccione la provincia");if(!mn)return toast("Seleccione el municipio");if(!rl)return toast("Seleccione el rol");
+   if(db.users.some(u=>String(u.cedula||"").replace(/\D/g,"")===ce))return toast("Ya existe un recolector con esa cédula");
+   const id="U-"+(db.users.length+1);db.users.push({id,nombre:n,rol:rl,whatsapp:wa,cedula:ce.slice(0,3)+"-"+ce.slice(3,10)+"-"+ce.slice(10),provincia:pv,municipio:mn,nuevo:true,activo:true});logA("Cambio de permisos / config",id,"Alta de recolector "+n);toast("Recolector agregado");close();setTimeout(vRecol,420)}})}
 function reclutador(id){const u=db.users.find(x=>x.id===id);const n=nReg(u),hoy=db.records.filter(r=>(r.rec===u.id||(u.id==="U-1"&&r.rec==="REC-001"))&&isToday(r.fecha)).length,val=db.records.filter(r=>(r.rec===u.id||(u.id==="U-1"&&r.rec==="REC-001"))&&r.estado==="verificado").length,pct=Math.min(100,Math.round(n/Math.max(1,db.meta)*100));
  const lk=location.href.split("?")[0].split("#")[0]+"?login="+u.id;
- dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:92vh;overflow-y:auto"><div class="sheet-head">${avt(u,64)}<div class="sheet-title"><h2 style="font-size:19px">${esc(u.nombre)}</h2><p>${esc(u.municipio||"—")}${u.provincia?", "+esc(u.provincia):""}</p></div><button class="iconbtn" data-x>${XI}</button></div>
+ dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:92vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-title"><h2 style="font-size:19px">${esc(u.nombre)}</h2><p>${esc(u.municipio||"—")}${u.provincia?", "+esc(u.provincia):""}</p></div><button class="iconbtn" data-x>${XI}</button></div>
  <div class="grid" style="margin-top:14px;grid-template-columns:repeat(3,minmax(0,1fr))"><div class="stat dark"><small>Firmas</small><b>${n}</b></div><div class="stat"><small>Hoy</small><b>${hoy}</b></div><div class="stat"><small>Validadas</small><b>${val}</b></div></div>
  <div class="card" style="margin-top:12px;padding:16px"><div class="row-between"><span>Rendimiento frente a la meta (${db.meta})</span><b style="color:#10131A">${pct}%</b></div><div class="prog"><i style="width:${pct}%"></i></div></div>
  <div class="hgrid" style="margin-top:6px"><div><label>Rol</label><select id="ur" ${me().rol==="administrador"?"":"disabled"}>${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${u.rol===k?"selected":""}>${r.n}</option>`).join("")}</select></div><div><label>Estado</label><select id="ue" ${me().rol==="administrador"&&u.id!==db.me?"":"disabled"}><option value="1" ${u.activo?"selected":""}>Activo</option><option value="0" ${u.activo?"":"selected"}>Suspendido</option></select></div></div>
@@ -208,6 +280,7 @@ function vConfig(){const u=me();const can=db.users.length&&ROLES[u.rol].p.includ
  view.innerHTML=`<div class="pad"><div class="card" style="margin-top:0"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#10131A" stroke-width="1.7"><circle cx="10" cy="8" r="3.5"/><path d="M3 20c0-3.5 3-6 7-6"/><circle cx="18" cy="16" r="2.4"/></svg></div><div class="sheet-title"><h2 style="font-size:20px">Mi perfil</h2><p>Nombre, foto y datos del reclutador</p></div></div>
  <div class="avwrap"><div class="avatar" id="av">${avatar}</div><label class="avcam"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.4"/></svg><input type="file" accept="image/*" id="fFoto" hidden></label></div>
  <div class="fgrid2"><div><label>Nombre</label><input type="text" id="pn" value="${esc(u.nombre)}"><div><label>Organización</label><input type="text" id="po" value="${esc(db.org)}" placeholder="Nombre de su organización" ${me().rol==="administrador"?"":"disabled"}></div></div>
+ <div><label>Cédula de identidad</label><input type="text" id="pc" inputmode="numeric" maxlength="13" placeholder="000-0000000-0" value="${esc(u.cedula||"")}"></div>
  <div><label>WhatsApp del reclutador</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">${WAI(22,"#25D366")}</span><input type="tel" id="pw" inputmode="tel" placeholder="809-000-0000" value="${esc(u.whatsapp||"")}" style="padding-left:48px"></div></div>
  <div><label>Provincia</label><select id="pp"><option value="">Seleccione</option>${PROVS.map(p=>`<option ${u.provincia===p?"selected":""}>${p}</option>`).join("")}</select></div>
  <div><label>Municipio</label><select id="pm"><option value="">Seleccione</option>${(MUNIS[u.provincia]||[]).map(m=>`<option ${m===u.municipio?"selected":""}>${m}</option>`).join("")}</select></div></div>
@@ -216,7 +289,7 @@ function vConfig(){const u=me();const can=db.users.length&&ROLES[u.rol].p.includ
  ${Object.entries(ROLES).filter(([k])=>k===u.rol).map(([k,r])=>`<div class="role ${u.rol===k?"on":""}"><h3>${r.n}${u.rol===k?"<em>Actual</em>":""}</h3><p>${r.d}</p>${r.p.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`).join("")}</div>
  <button class="btn btn-red" id="cr">Borrar datos locales</button></div>`;
  $("#fFoto").onchange=e=>{const f=e.target.files[0];if(!f)return;const x=new FileReader();x.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=256;const g=c.getContext("2d"),k=Math.max(256/im.width,256/im.height);g.drawImage(im,(256-im.width*k)/2,(256-im.height*k)/2,im.width*k,im.height*k);u.foto=c.toDataURL("image/jpeg",.8);save();$("#av").innerHTML=`<img src="${u.foto}">`;toast("Foto actualizada")};im.src=x.result};x.readAsDataURL(f)};
- $("#pp").onchange=e=>{$("#pm").innerHTML='<option value="">Seleccione</option>'+(MUNIS[e.target.value]||[]).map(m=>`<option>${m}</option>`).join("")};$("#ps").onclick=()=>{if($("#po")&&$("#po").value.trim())db.org=$("#po").value.trim();const wa=$("#pw").value.replace(/\D/g,"");if($("#pw").value&&wa.length<10)return toast("WhatsApp inválido (10 dígitos)");u.nombre=$("#pn").value.trim()||u.nombre;u.whatsapp=wa;u.provincia=$("#pp").value;u.municipio=$("#pm").value.trim();db.collector.name=u.nombre;logA("Cambio de permisos / config",u.id,"Perfil de "+u.nombre);toast("Perfil guardado");vConfig()};
+ $("#pp").onchange=e=>{$("#pm").innerHTML='<option value="">Seleccione</option>'+(MUNIS[e.target.value]||[]).map(m=>`<option>${m}</option>`).join("")};$("#ps").onclick=()=>{const ced=($("#pc")?$("#pc").value:"").replace(/\D/g,"");if(ced&&ced.length!==11)return toast("La cédula debe tener 11 dígitos");if(ced){if(db.users.some(x=>x.id!==u.id&&String(x.cedula||"").replace(/\D/g,"")===ced))return toast("Esa cédula ya está registrada");u.cedula=ced.slice(0,3)+"-"+ced.slice(3,10)+"-"+ced.slice(10)}if($("#po")&&$("#po").value.trim())db.org=$("#po").value.trim();const wa=$("#pw").value.replace(/\D/g,"");if($("#pw").value&&wa.length<10)return toast("WhatsApp inválido (10 dígitos)");u.nombre=$("#pn").value.trim()||u.nombre;u.whatsapp=wa;u.provincia=$("#pp").value;u.municipio=$("#pm").value.trim();db.collector.name=u.nombre;logA("Cambio de permisos / config",u.id,"Perfil de "+u.nombre);toast("Perfil guardado");vConfig()};
  $$(".urol").forEach(s=>s.onchange=()=>{const x=db.users.find(y=>y.id===s.dataset.uid);x.rol=s.value;logA("Cambio de permisos / config",x.id,"Permisos rol "+x.rol+" para "+x.nombre);toast("Rol actualizado");vConfig()});
  $$(".utog").forEach(b=>b.onclick=()=>{const x=db.users.find(y=>y.id===b.dataset.uid);x.activo=!x.activo;logA("Cambio de permisos / config",x.id,(x.activo?"Activación de ":"Suspensión de ")+x.nombre);toast(x.activo?"Acceso activado":"Acceso suspendido");vConfig()});
  if($("#addU"))$("#addU").onclick=()=>{const n=prompt("Nombre del reclutador:");if(!n||!n.trim())return;const id="U-"+(db.users.length+1);db.users.push({id,nombre:n.trim(),rol:"recolector",whatsapp:"",provincia:"",municipio:"",activo:true,nuevo:true});logA("Cambio de permisos / config",id,"Alta de reclutador "+n.trim());toast("Reclutador agregado");vConfig()};
@@ -288,10 +361,10 @@ function citizenDone(){const v=document.getElementById("view");v.innerHTML=`<div
 
 /* ---- Acceso de reclutadores por enlace unico ---- */
 const LOGN=new URLSearchParams(location.search).get("login");
-function onboarding(u){const R=ROLES[u.rol];
- document.body.innerHTML=`<div style="min-height:100vh;background:#FAFBFC;display:grid;place-items:center;padding:24px">
- <div style="max-width:520px;width:100%;background:#fff;border:1px solid #EEF0F3;border-radius:28px;padding:34px 28px;box-shadow:0 18px 50px rgba(16,19,26,.10);text-align:center">
-  <img src="icons/logo-96.png" width="62" height="62" alt="FirmAbal" style="margin:0 auto 10px">
+function onboarding(u){const R=ROLES[u.rol];document.body.style.overflow="auto";document.documentElement.style.overflow="auto";
+ document.body.innerHTML=`<div style="min-height:100dvh;background:#FAFBFC;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 40px)">
+ <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #EEF0F3;border-radius:28px;padding:34px 28px;box-shadow:0 18px 50px rgba(16,19,26,.10);text-align:center">
+  <img src="icons/logo-badge-96.png" width="64" height="64" alt="FirmAbal" style="margin:0 auto 10px;border-radius:18px;display:block">
   <h1 style="font-size:24px;margin:6px 0 2px">Bienvenido, ${esc(u.nombre.split(" ")[0])}</h1>
   <p style="color:#6B7280;font-size:16px;margin:0 0 20px">La administración le ha otorgado acceso a la plataforma.</p>
   <div style="border:1px solid #E7E9EE;border-radius:20px;padding:16px;margin:0 0 14px;text-align:left">
@@ -307,9 +380,35 @@ function onboarding(u){const R=ROLES[u.rol];
  </div></div>`;
  document.getElementById("obGo").onclick=()=>{u.nuevo=false;db.ses=u.id;save();location.replace(location.pathname)};}
 
+
+/* ---- Inicio de sesion del recolector: usuario = ultimos 4 digitos de la cedula; el enlace = contrasena ---- */
+function loginRecolector(u){document.body.style.overflow="auto";document.documentElement.style.overflow="auto";
+ const intentos=()=>+sessionStorage.getItem("fb-try-"+u.id)||0;
+ document.body.innerHTML=`<div id="loginwrap" style="min-height:100dvh;background:#FAFBFC;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 28px) 20px calc(env(safe-area-inset-bottom) + 40px)">
+ <div style="max-width:460px;margin:0 auto;background:#fff;border:1px solid #EEF0F3;border-radius:28px;padding:32px 26px;box-shadow:0 18px 50px rgba(16,19,26,.10);text-align:center">
+  <img src="icons/logo-badge-96.png" width="68" height="68" alt="FirmAbal" style="margin:0 auto 12px;border-radius:19px;display:block">
+  <h1 style="font-size:23px;margin:4px 0 2px">Hola, ${esc(u.nombre.split(" ")[0])}</h1>
+  <p style="color:#6B7280;font-size:15.5px;margin:0 0 20px;line-height:1.5">Este es su enlace personal de acceso. Para entrar, confirme su identidad.</p>
+  <div style="text-align:left"><label style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#6B7280;margin:0 0 8px">Número de usuario</label>
+  <input type="text" id="lgU" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000" style="width:100%;font-size:30px;letter-spacing:.5em;text-align:center;padding:16px;border:1px solid #E1E4EA;border-radius:18px;font-family:ui-monospace,monospace">
+  <p style="color:#8A909C;font-size:13.5px;margin:10px 2px 0;line-height:1.5">Escriba los <b>últimos 4 dígitos</b> de su cédula de identidad.</p></div>
+  <p id="lgErr" style="color:#B3261E;font-size:14px;min-height:20px;margin:12px 0 4px"></p>
+  <button id="lgGo" style="width:100%;padding:17px;border-radius:18px;border:0;background:#10131A;color:#fff;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit">Iniciar sesión</button>
+  <p style="color:#9AA0AC;font-size:12.5px;margin:16px 0 0;line-height:1.5">Su enlace es personal e intransferible. Si no puede entrar, comuníquese con la administración.</p>
+ </div></div>`;
+ const go=()=>{const v=document.getElementById("lgU").value.replace(/\D/g,""),err=document.getElementById("lgErr");
+  if(intentos()>=5){err.textContent="Demasiados intentos. Comuníquese con la administración.";return}
+  if(v.length!==4){err.textContent="Escriba los 4 dígitos.";return}
+  const ced=String(u.cedula||"").replace(/\D/g,"");
+  if(!ced){err.textContent="Su cédula aún no está registrada. Comuníquese con la administración.";return}
+  if(ced.slice(-4)!==v){sessionStorage.setItem("fb-try-"+u.id,intentos()+1);err.textContent="Número de usuario incorrecto. Intentos restantes: "+Math.max(0,5-intentos());document.getElementById("lgU").value="";return}
+  sessionStorage.setItem("fb-auth",u.id);sessionStorage.removeItem("fb-try-"+u.id);location.reload()};
+ document.getElementById("lgGo").onclick=go;document.getElementById("lgU").onkeydown=e=>{if(e.key==="Enter")go()};
+ document.getElementById("lgU").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,4);document.getElementById("lgErr").textContent=""}}
+
 /* ---- MODO CIUDADANO: solo autorregistro ---- */
 function citizenMode(){
- document.body.innerHTML=`<div id="citz"><header class="ctop"><div style="display:flex;gap:12px;align-items:center"><div class="clogo"><img src="icons/logo-96.png" width="34" height="34" alt="FirmAbal"></div><div><div style="font-size:21px;font-weight:600">FirmAbal</div><div style="color:#8A909C;font-size:15px">Autorregistro ciudadano</div></div></div><button class="iconbtn" id="cShare" aria-label="Compartir">${ico("captura",0)}<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1A1D21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.600 13.400l6.800 4M8.600 10.600l6.800-4"/></svg></button></header>
+ document.body.innerHTML=`<div id="citz"><header class="ctop"><div style="display:flex;gap:12px;align-items:center"><div class="clogo" style="background:transparent;box-shadow:none"><img src="icons/logo-badge-96.png" width="52" height="52" alt="FirmAbal" style="border-radius:15px"></div><div><div style="font-size:21px;font-weight:600">FirmAbal</div><div style="color:#8A909C;font-size:15px">Autorregistro ciudadano</div></div></div><button class="iconbtn" id="cShare" aria-label="Compartir">${ico("captura",0)}<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1A1D21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.600 13.400l6.800 4M8.600 10.600l6.800-4"/></svg></button></header>
  <main id="view" class="cview"></main><div class="sheet-mask" id="sheetMask" hidden></div><div class="toast" id="toast"></div></div>`;
  view=document.getElementById("view");
  cStart()}
@@ -386,6 +485,9 @@ function bindWiz(){const s=wiz.step,next=$("#next");
 
 if(new URLSearchParams(location.search).get("auto")){db.records.auto=true}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-if(LOGN){const u=db.users.find(x=>x.id===LOGN);if(u&&u.activo!==false){db.ses=u.id;save();if(u.nuevo!==false){onboarding(u);return}}else if(!u){document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>Enlace de acceso no válido.</p>";return}}
+if(LOGN){const u=db.users.find(x=>x.id===LOGN);if(!u){document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>Enlace de acceso no válido.</p>";return}
+ if(u.activo===false){document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>Su acceso está suspendido. Comuníquese con la administración.</p>";return}
+ if(sessionStorage.getItem("fb-auth")!==u.id){loginRecolector(u);return}
+ db.ses=u.id;save();if(u.nuevo!==false){onboarding(u);return}}
 if(AUTO){document.body.classList.add("citizen");citizenMode()}else goNow("dash");
 })();

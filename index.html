@@ -14,7 +14,7 @@
 <body>
 <aside id="sidebar" class="sb">
   <div class="sb-brand">
-    <img class="logo" src="icons/logo-96.png" width="34" height="34" alt="FirmAbal">
+    <img class="logo" src="icons/logo-badge-96.png" width="36" height="36" alt="FirmAbal" style="border-radius:10px">
     <span class="sb-name">FirmAbal</span>
     <button class="iconbtn sb-toggle" id="btnSideToggle" title="Contraer"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
   </div>
@@ -24,7 +24,7 @@
 <div id="shell">
 <header class="topbar">
   <div class="brand">
-    <img class="logo" src="icons/logo-96.png" width="30" height="30" alt="FirmAbal">
+    <img class="logo" src="icons/logo-badge-96.png" width="32" height="32" alt="FirmAbal" style="border-radius:9px">
     <span>FirmAbal</span>
   </div>
   <div class="tb-actions">
@@ -33,13 +33,18 @@
   </div>
 </header>
 <main id="view"></main>
+<div id="installBar" class="ib" aria-live="polite">
+  <img src="icons/logo-badge-96.png" width="42" height="42" alt="" class="ib-logo">
+  <div class="ib-txt"><b>Instale FirmAbal</b><span>Acceso directo, sin navegador</span></div>
+  <button class="ib-btn" id="ibGo">Instalar</button>
+  <button class="ib-x" id="ibX" aria-label="Cerrar">×</button>
+</div>
+
 <nav class="tabbar" id="tabbar"></nav>
 </div>
 <div class="sheet-mask" id="sheetMask" hidden></div>
 <section class="sheet" id="autoSheet" hidden>
   <div class="handle"></div>
-  <div class="sheet-head" style="justify-content:flex-end">
-  <button class="iconbtn" id="btnCloseSheet" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1A1D21" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="two"><button class="btn btn-wa" id="btnWa"><svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><path fill="#fff" d="M16 3C8.8 3 3 8.8 3 16c0 2.5.7 4.8 1.9 6.8L3 29l6.4-1.8A13 13 0 0 0 16 29c7.2 0 13-5.8 13-13S23.2 3 16 3zm0 23.7c-2 0-3.9-.6-5.6-1.6l-.4-.2-3.8 1.1 1-3.7-.3-.4A10.7 10.7 0 1 1 16 26.7zm5.9-8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.5c.1-.2.2-.3.3-.5.1-.2.1-.4 0-.5l-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.4 5.3 4.7 3.1 1.3 3.1.9 3.7.8.6-.1 1.9-.8 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg> WhatsApp</button><button class="btn btn-dark" id="btnQr"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></svg> Código QR</button></div>
   <p class="sheet-foot">Comparta para que el ciudadano se registre solo y quedará asociado a usted como su promotor.</p>
 </section>
@@ -52,7 +57,7 @@
 </section>
 <section class="sheet" id="menuSheet" hidden>
   <div class="handle"></div>
-  <div class="sheet-head" style="margin-bottom:10px"><img src="icons/logo-96.png" width="34" height="34" alt="FirmAbal"><div class="sheet-title"><h2>FirmAbal</h2></div>
+  <div class="sheet-head" style="margin-bottom:10px"><img src="icons/logo-badge-96.png" width="36" height="36" alt="FirmAbal" style="border-radius:10px"><div class="sheet-title"><h2>FirmAbal</h2></div>
   <button class="iconbtn" id="btnCloseMenu" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1A1D21" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="menugrid" id="menuGrid"></div>
 </section>
