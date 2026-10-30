@@ -5,7 +5,7 @@ const KEY="firmabal-db-v4";
 const db=JSON.parse(localStorage.getItem(KEY)||"null")||{meta:10,collector:{id:"REC-001",name:"Domingo Guerra",sharing:false},records:[
  {id:"R-1",nombre:"CARMEN CHALAS MENA",cedula:"224-0009987-9",nac:"1975-03-20",sexo:"F",lugar:"Santo Domingo",whatsapp:"8296469885",direccion:"San José casa 37",municipio:"Santo Domingo Oeste",distrito:"",sector:"Hato Nuevo",circ:"4",firma:null,estado:"verificado",fecha:Date.now()-86400000*3,rec:"REC-001",lat:18.4861,lng:-69.9712},
  {id:"R-2",nombre:"MIGUEL ANGEL GUERRA CHALAS",cedula:"402-2990201-2",nac:"1999-08-11",sexo:"M",lugar:"Santo Domingo",whatsapp:"8095550002",direccion:"Calle Principal 5",municipio:"Santo Domingo",distrito:"",sector:"Hato Nuevo",circ:"4",firma:null,estado:"pendiente",fecha:Date.now()-86400000*3,rec:"REC-001",lat:18.4722,lng:-69.9961}]};
-const ROLES={administrador:{n:"Administrador",d:"Acceso completo al sistema.",p:["capturar","consultar","cedula","telefono","firmas","modificar","eliminar","exportar","auditoria","configurar","usuarios","monitor"]},supervisor:{n:"Supervisor",d:"Consulta, revisión y supervisión de registros.",p:["capturar","consultar","cedula","telefono","firmas","modificar","exportar","monitor"]},recolector:{n:"Recolector",d:"Captura de registros y consulta mínima.",p:["capturar","consultar"]},auditor:{n:"Auditor",d:"Consulta de registros de auditoría.",p:["consultar","auditoria"]}};
+const ROLES={administrador:{n:"Administrador",d:"Acceso completo al sistema.",p:["capturar","consultar","cedula","telefono","firmas","modificar","eliminar","exportar","auditoria","configurar","usuarios","monitor"]},supervisor:{n:"Supervisor",d:"Consulta, revisión y supervisión de registros.",p:["capturar","consultar","cedula","telefono","firmas","modificar","exportar","monitor"]},recolector:{n:"Recolector",d:"Captura de registros y consulta mínima.",p:["capturar","consultar","firmas","monitor","configurar"]},auditor:{n:"Auditor",d:"Consulta de registros de auditoría.",p:["consultar","auditoria"]}};
 const GEO={"Distrito Nacional":[18.4861,-69.9312,{"Santo Domingo de Guzmán":[18.4861,-69.9312]}],"Santo Domingo":[18.5,-69.85,{"Santo Domingo Este":[18.4885,-69.857],"Santo Domingo Oeste":[18.495,-70.018],"Santo Domingo Norte":[18.556,-69.91],"Boca Chica":[18.4497,-69.6061],"San Antonio de Guerra":[18.543,-69.699],"Pedro Brand":[18.583,-70.099],"Los Alcarrizos":[18.508,-70.017]}],"Santiago":[19.45,-70.69,{"Santiago de los Caballeros":[19.4517,-70.697],"Villa Bisonó (Navarrete)":[19.56,-70.88],"Licey al Medio":[19.392,-70.593],"Tamboril":[19.48,-70.61],"Jánico":[19.319,-70.833],"Puñal":[19.383,-70.787],"Villa González":[19.5,-70.8]}],"La Vega":[19.22,-70.53,{"La Vega":[19.221,-70.529],"Jarabacoa":[19.117,-70.636],"Constanza":[18.909,-70.745]}],"San Cristóbal":[18.42,-70.11,{"San Cristóbal":[18.418,-70.109],"Villa Altagracia":[18.67,-70.169],"Bajos de Haina":[18.417,-70.035],"Yaguate":[18.335,-70.2]}],"Puerto Plata":[19.79,-70.69,{"Puerto Plata":[19.7934,-70.6884],"Sosúa":[19.75,-70.517],"Imbert":[19.75,-70.82]}],"La Altagracia":[18.58,-68.4,{"Higüey":[18.615,-68.708],"Punta Cana (Verón)":[18.582,-68.405],"San Rafael del Yuma":[18.425,-68.669]}],"San Pedro de Macorís":[18.46,-69.3,{"San Pedro de Macorís":[18.4539,-69.3086],"Consuelo":[18.57,-69.29]}],"Duarte":[19.3,-70.25,{"San Francisco de Macorís":[19.3009,-70.2528],"Pimentel":[19.206,-70.297]}],"Espaillat":[19.62,-70.39,{"Moca":[19.394,-70.526],"Gaspar Hernández":[19.627,-70.281]}],"La Romana":[18.43,-68.97,{"La Romana":[18.4273,-68.9728]}],"Azua":[18.45,-70.73,{"Azua de Compostela":[18.453,-70.734]}],"Barahona":[18.21,-71.1,{"Barahona":[18.2085,-71.1008]}],"Monseñor Nouel":[18.92,-70.4,{"Bonao":[18.936,-70.409]}],"Peravia":[18.28,-70.33,{"Baní":[18.279,-70.331]}],"Valverde":[19.59,-70.98,{"Mao":[19.552,-70.987]}],"Monte Cristi":[19.85,-71.64,{"Monte Cristi":[19.849,-71.646]}],"Dajabón":[19.55,-71.7,{"Dajabón":[19.5499,-71.7088]}],"Santiago Rodríguez":[19.47,-71.34,{"San Ignacio de Sabaneta":[19.478,-71.344]}],"María Trinidad Sánchez":[19.38,-69.85,{"Nagua":[19.383,-69.847]}],"Samaná":[19.2,-69.34,{"Samaná":[19.2056,-69.3364]}],"Hermanas Mirabal":[19.37,-70.38,{"Salcedo":[19.377,-70.417]}],"Sánchez Ramírez":[19.05,-70.15,{"Cotuí":[19.052,-70.15]}],"Monte Plata":[18.81,-69.79,{"Monte Plata":[18.808,-69.785]}],"Hato Mayor":[18.76,-69.25,{"Hato Mayor del Rey":[18.763,-69.257]}],"El Seibo":[18.77,-69.04,{"El Seibo":[18.765,-69.039]}],"San Juan":[18.81,-71.23,{"San Juan de la Maguana":[18.806,-71.23]}],"Elías Piña":[18.88,-71.7,{"Comendador":[18.876,-71.705]}],"Independencia":[18.48,-71.85,{"Jimaní":[18.498,-71.85]}],"Bahoruco":[18.48,-71.42,{"Neiba":[18.481,-71.419]}],"Pedernales":[18.04,-71.74,{"Pedernales":[18.038,-71.744]}],"San José de Ocoa":[18.54,-70.5,{"San José de Ocoa":[18.546,-70.504]}]};
 const MUNIS=Object.fromEntries(Object.entries(GEO).map(([p,v])=>[p,Object.keys(v[2])]));
 const PROVS=Object.keys(MUNIS);
@@ -13,10 +13,23 @@ db.users=db.users||[{id:"U-1",nombre:db.collector.name,rol:"administrador",whats
 db.org=db.org||"FirmAbal";db.ses=db.ses||"U-1";db.audit=db.audit||[{t:Date.now()-86400000*2,u:db.collector.name,a:"Creación de registro",reg:"R-1",det:"Cédula 224-0009987-9",ok:true},{t:Date.now()-86400000*2,u:db.collector.name,a:"Creación de registro",reg:"R-2",det:"Cédula 402-2990201-2",ok:true},{t:Date.now()-86400000,u:db.collector.name,a:"Cambio de permisos / config",reg:"—",det:"Permisos rol administrador",ok:true}];
 db.me=db.me||"U-1";
 const me=()=>db.users.find(u=>u.id===db.ses)||db.users[0];
-function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+const SNAP_K="firmabal-snap-v1";let SNAP=null;
+const sig=o=>JSON.stringify([o.estado,o.nombre,o.cedula,o.direccion,o.sector,o.municipio,o.distrito,o.circ,o.rec,o.whatsapp,o.rol,o.activo,o.nuevo,o.foto?o.foto.length:0,o.provincia]);
+function cloudDiff(){if(!window.FASync)return;
+ try{SNAP=SNAP||JSON.parse(localStorage.getItem(SNAP_K)||"null")||{r:{},u:{}};}catch(e){SNAP={r:{},u:{}}}
+ const nr={},nu={};
+ db.records.forEach(r=>{const s=sig(r);nr[r.id]=s;if(SNAP.r[r.id]!==s)FASync.saveRecord(r,recName(r))});
+ Object.keys(SNAP.r).forEach(id=>{if(!(id in nr)&&!(db.__skipDel||{})[id])FASync.deleteRecord(id)});
+ db.users.forEach(u=>{const s=sig(u);nu[u.id]=s;if(SNAP.u[u.id]!==s)FASync.saveUser(u)});
+ SNAP={r:nr,u:nu};try{localStorage.setItem(SNAP_K,JSON.stringify(SNAP))}catch(e){}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));try{cloudDiff()}catch(e){}}
 const PERMV={dash:[],captura:["capturar"],reg:["consultar"],firmas:["firmas"],monitor:["monitor"],terr:["consultar"],recol:["usuarios"],audit:["auditoria"],export:["exportar"],config:["configurar"]};
+const recNombreTxt=r=>(r.municipio||"")+(r.sector?", "+r.sector:"")+(r.circ?" · Circ. "+r.circ:"");
+const esRecolector=()=>me().rol==="recolector";
+const mine=r=>{const u=me();if(u.rol!=="recolector")return true;const id=u.id;return r.rec===id||r.rec_nombre===u.nombre||(id==="U-1"&&r.rec==="REC-001")};
+const myRecords=()=>db.records.filter(mine);
 const can=v=>{const u=me();const p=(ROLES[u.rol]||{p:[]}).p;return (PERMV[v]||[]).every(x=>p.includes(x))};
-const logA=(a,reg,det,ok=true)=>{db.audit.unshift({t:Date.now(),u:me().nombre,a,reg:reg||"—",det:det||"—",ok});db.audit=db.audit.slice(0,300);save()};
+const logA=(a,reg,det,ok=true)=>{db.audit.unshift({t:Date.now(),u:me().nombre,a,reg:reg||"—",det:det||"—",ok});db.audit=db.audit.slice(0,300);save();try{window.FASync&&FASync.audit({t:Date.now(),usuario:me().nombre,accion:a,registro:reg||"—",detalle:det||"—",ok})}catch(e){}};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2400)};
 const WAI=(w,c)=>`<svg viewBox="0 0 32 32" width="${w}" height="${w}" aria-hidden="true"><path fill="${c}" d="M16 3C8.8 3 3 8.8 3 16c0 2.5.7 4.8 1.9 6.8L3 29l6.4-1.8A13 13 0 0 0 16 29c7.2 0 13-5.8 13-13S23.2 3 16 3zm0 23.7c-2 0-3.9-.6-5.6-1.6l-.4-.2-3.8 1.100 1-3.700-.3-.4A10.700 10.700 0 1 1 16 26.700zm5.900-8c-.3-.2-1.900-.9-2.200-1-.3-.1-.5-.2-.7.2-.2.300-.8 1-1 1.200-.2.200-.4.200-.7.100-.3-.2-1.400-.5-2.600-1.600-1-.9-1.600-1.900-1.800-2.200-.2-.3 0-.5.100-.7l.5-.5c.1-.2.200-.3.300-.5.100-.2.100-.4 0-.5l-1-2.300c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.100-.8.400-.3.300-1.100 1.100-1.100 2.600s1.100 3 1.300 3.200c.2.200 2.200 3.400 5.300 4.700 3.100 1.300 3.100.9 3.700.8.600-.1 1.900-.8 2.100-1.500.3-.7.300-1.400.2-1.500-.1-.2-.3-.3-.6-.4z"/></svg>`;
 const ICONS={
@@ -75,6 +88,17 @@ config:{t:"Configuración",d:"Su perfil y los accesos del equipo.",p:["Actualice
 function ayuda(){const h=HELP[cur]||HELP.dash;dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:88vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-title"><h2>${h.t}</h2><p>${h.d}</p></div><button class="iconbtn" data-x>${XI}</button></div>
  <div class="help-box" style="margin-top:14px"><div class="help-sec" style="margin:0"><h4>Cómo usar esta pantalla</h4><ol style="padding-left:20px;margin:8px 0 0">${h.p.map(x=>`<li>${x}</li>`).join("")}</ol></div></div></section>`)}
 $("#btnHelp").onclick=ayuda;
+/* ---- Notificaciones (campana) ---- */
+window.__me=()=>me().id;
+function notifs(){window.FANotif&&FANotif.paintBadge();
+ dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-width:860px;max-height:88vh;overflow-y:auto">
+ <div class="sheet-head"><div class="sheet-title"><h2 style="font-size:19px">Notificaciones</h2><p>Actividad de su equipo y del sistema</p></div><button class="iconbtn" data-x>${XI}</button></div>
+ <div class="nlist" id="nHost" style="margin-top:14px"></div>
+ <button class="btn btn-light" id="nRead" style="margin-top:16px;border:1px solid #E1E4EA">Marcar todo como leído</button></section>`,
+ (w,close)=>{const host=$("#nHost",w);window.FANotif&&FANotif.paintList(host);
+  $("#nRead",w).onclick=()=>{window.FANotif&&FANotif.markAllRead();window.FANotif&&FANotif.paintList(host);toast("Notificaciones marcadas")}})}
+$("#btnBell").onclick=notifs;
+if(window.FANotif){FANotif.paintBadge();setInterval(()=>window.FANotif&&FANotif.paintBadge(),15000)}
 
 /* ---- Tarjeta de instalacion (solo navegador) ---- */
 let ibPrompt=null,ibTimer=null;
@@ -134,7 +158,7 @@ function provDe(r){if(r.provincia&&GEO[r.provincia])return r.provincia;const m=n
 function munDe(r,p){const m=norm(r.municipio);if(!p||!GEO[p]||!m)return null;for(const mu of Object.keys(GEO[p][2])){const n=norm(mu);if(n===m||m.includes(n)||(n.includes(m)&&m.length>5))return mu}return null}
 function covData(){const P={};let sinUbic=0;db.records.forEach(r=>{const p=provDe(r);if(!p){sinUbic++;return}
   const m=munDe(r,p)||"(otro municipio)";const area=((r.distrito||"").trim())||((r.sector||"").trim())||"Sin sector";
-  P[p]=P[p]||{n:0,M:{}};P[p].n++;P[p].M[m]=P[p].M[m]||{n:0,S:{}};P[p].M[m].n++;P[p].M[m].S[area]=(P[p].M[m].S[area]||0)+1});return {P,sinUbic}}
+  P[p]=P[p]||{n:0,M:{}};P[p].n++;P[p].M[m]=P[p].M[m]||{n:0,S:{}};P[p].M[m].n++;const C=P[p].M[m].C||(P[p].M[m].C={});const c0=C[area]||(C[area]={n:0,la:0,lo:0});c0.n++;if(r.lat&&r.lng){c0.la+=r.lat;c0.lo+=r.lng;c0.g=true}P[p].M[m].S[area]=(P[p].M[m].S[area]||0)+1});return {P,sinUbic}}
 function vCov(){const w=document.getElementById("covmap");if(!w)return;
  if(covMap){covMap.remove();covMap=null}
  covMap=L.map("covmap",{zoomControl:false,attributionControl:false,scrollWheelZoom:false,zoomSnap:.25}).setView([18.95,-70.35],7.2);
@@ -152,7 +176,7 @@ function vCov(){const w=document.getElementById("covmap");if(!w)return;
    if(!Object.keys(P).length)bub([18.95,-70.35],0,"Sin registros ubicados","g")}
   else if(!covLv.m){const g=GEO[covLv.p],d=P[covLv.p]||{M:{}};Object.entries(d.M).forEach(([m,v],i)=>{const c=g[2][m]||[g[0]+Math.sin(i*2.4)*.05,g[1]+Math.cos(i*2.4)*.05];bub(c,v.n,m,"g",()=>{covLv.m=m;covMap.flyTo(c,12.5,{duration:.9});draw()})})}
   else{const g=GEO[covLv.p],c=g[2][covLv.m]||[g[0],g[1]],S=((P[covLv.p]||{M:{}}).M[covLv.m]||{S:{}}).S;const ks=Object.keys(S);
-   ks.forEach((s,i)=>{const a=(i/Math.max(1,ks.length))*Math.PI*2,rad=ks.length>1?.012:0;bub([c[0]+Math.sin(a)*rad,c[1]+Math.cos(a)*rad*1.1],S[s],s,"g")})}};
+   ks.forEach((s,i)=>{const a=(i/Math.max(1,ks.length))*Math.PI*2,rad=ks.length>1?.012:0;const cc=(((P[covLv.p]||{}).M||{})[covLv.m]||{}).C||{};const g2=cc[s];const pos=(g2&&g2.g)?[g2.la/g2.n,g2.lo/g2.n]:[c[0]+Math.sin(a)*rad,c[1]+Math.cos(a)*rad*1.1];bub(pos,S[s],s,'g')})}};
  draw();setTimeout(()=>covMap.invalidateSize(),250)}
 
 function vDash(){const s=stats();covLv={p:null,m:null};setTimeout(vCov,60);
@@ -176,9 +200,9 @@ function vEquipo(){const s=stats();const live=!!db.collector.sharing;
   <div class="kcard"><div class="ico">${ico("recol",20,1.8)}</div><b>${db.users.filter(u=>u.activo).length}</b><span class="kcard-l">Recolectores activos</span></div>
   <div class="kcard"><div class="ico">${ico("monitor",20,1.8)}</div><b>${live?1:0}</b><span class="kcard-l">Compartiendo ubicación</span></div>
   <div class="kcard"><div class="ico">${ico("firmas",20,1.8)}</div><b>${s.total}</b><span class="kcard-l">Registros</span></div>
-  <div class="kcard dark"><div class="ico">${ico("terr",20,1.8,"#fff")}</div><b>${new Set(db.records.map(r=>(r.municipio||"")+"|"+(r.sector||""))).size}</b><span class="kcard-l">Sectores cubiertos</span></div>
+  <div class="kcard"><div class="ico">${ico("terr",20,1.8)}</div><b>${new Set(db.records.map(r=>(r.municipio||"")+"|"+(r.sector||""))).size}</b><span class="kcard-l">Sectores cubiertos</span></div>
   <div class="kcard"><div class="ico">${ico("dash",20,1.8)}</div><b>${db.users.filter(u=>u.activo).length?Math.round(s.hoy/Math.max(1,db.users.filter(u=>u.activo).length)*10)/10:0}</b><span class="kcard-l">Promedio por recolector</span></div>
-  <div class="kcard amber"><div class="ico">${ico("audit",20,"1.8","#B4640B")}</div><b style="color:#B4640B">${s.pen}</b><span class="kcard-l">Por validar</span></div>
+  <div class="kcard"><div class="ico">${ico("audit",20,1.8)}</div><b>${s.pen}</b><span class="kcard-l">Por validar</span></div>
  </div>
  <button class="fab ${live?"live":""}" id="shareLoc" title="${live?"Dejar de compartir ubicación":"Compartir mi ubicación en vivo"}" aria-label="Ubicación en vivo"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.500-5.700-6.500-10.800a6.500 6.500 0 0 1 13 0C18.500 15.300 12 21 12 21z"/><circle cx="12" cy="10.200" r="2.400"/></svg></button>`;
  map=L.map("map",{zoomControl:true}).setView([18.4861,-69.9312],11);
@@ -188,10 +212,13 @@ function vEquipo(){const s=stats();const live=!!db.collector.sharing;
  L.marker(db.collector.pos,{icon:L.divIcon({className:"",iconSize:[52,52],iconAnchor:[26,26],html:`<div class="pinme">${img}</div>`})}).addTo(map).bindPopup("<b>Ubicación en vivo compartida</b>")}
  $("#shareLoc").onclick=()=>{if(db.collector.sharing){clearInterval(window._gps);db.collector.sharing=false;save();toast("Ubicación en vivo desactivada");return vEquipo()}
   if(!navigator.geolocation)return toast("Geolocalización no disponible");
-  navigator.geolocation.getCurrentPosition(p=>{db.collector.sharing=true;db.collector.pos=[p.coords.latitude,p.coords.longitude];save();toast("Compartiendo ubicación en vivo");vEquipo();
+  navigator.geolocation.getCurrentPosition(p=>{db.collector.sharing=true;db.collector.pos=[p.coords.latitude,p.coords.longitude];save();
+   try{window.FANotif&&FANotif.alert("location");window.FANotif&&FANotif.push({para:"admin",tipo:"ubicacion",titulo:me().nombre+" está compartiendo ubicación",texto:"Ubicación en vivo activada desde "+(me().municipio||"el campo")+".",t:Date.now()});
+     window.FASync&&FASync.saveLocation({uid:me().id,nombre:me().nombre,lat:p.coords.latitude,lng:p.coords.longitude,t:Date.now(),compartiendo:true})}catch(e){}
+   toast("Compartiendo ubicación en vivo");vEquipo();
    window._gps=setInterval(()=>navigator.geolocation.getCurrentPosition(q=>{db.collector.pos=[q.coords.latitude,q.coords.longitude];save()}),15000)},()=>toast("No se pudo obtener la ubicación"))}}
 /* ---- Firmas ---- */
-function vFirmas(){view.innerHTML=`<div class="pad"><div class="firmas">${db.records.map(r=>`<div class="fcard" data-id="${r.id}"><div class="fsig">${r.firma?`<img src="${r.firma}">`:`<svg viewBox="0 0 120 50" width="110"><path d="M5 35c15-30 20 5 30-15s15 30 30 0 20-10 30 5" fill="none" stroke="#10131A" stroke-width="2"/></svg>`}</div><b>${esc(r.nombre)}</b><small style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%"><span style="color:#3A3F4A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(recName(r))}</span><span>${new Date(r.fecha).toLocaleDateString("es-DO")}</span></small></div>`).join("")}</div></div>`;
+function vFirmas(){view.innerHTML=`<div class="pad"><div class="firmas">${myRecords().map(r=>`<div class="fcard" data-id="${r.id}"><div class="fsig">${r.firma?`<img src="${r.firma}">`:`<svg viewBox="0 0 120 50" width="110"><path d="M5 35c15-30 20 5 30-15s15 30 30 0 20-10 30 5" fill="none" stroke="#10131A" stroke-width="2"/></svg>`}</div><b>${esc(r.nombre)}</b><small style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%"><span style="color:#3A3F4A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(recName(r))}</span><span>${new Date(r.fecha).toLocaleDateString("es-DO")}</span></small></div>`).join("")}</div></div>`;
  $$(".fcard").forEach(c=>c.onclick=()=>detalle(c.dataset.id))}
 function detalle(id){const r=db.records.find(x=>x.id===id);
  const lbl=(t,svg)=>`<div style="display:flex;gap:8px;align-items:center;font-weight:700;letter-spacing:.06em;color:#3A3F4A;font-size:14px;margin:0 0 10px">${svg}${t}</div>`;
@@ -206,7 +233,13 @@ function detalle(id){const r=db.records.find(x=>x.id===id);
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">${box("FRONTAL","imgFRONTAL")}${box("TRASERA","imgTRASERA")}</div>
   <div class="card" style="margin-top:18px;padding:6px 16px">${lbl("DATOS DEL FIRMANTE","")}${dato("Nombre",r.nombre)}${dato("Cédula",r.cedula)}${dato("Nacimiento",r.nac)}${dato("Sexo",r.sexo)}${dato("Lugar de nacimiento",r.lugar)}${dato("WhatsApp",r.whatsapp)}${dato("Dirección",r.direccion)}</div>
   <div class="card" style="margin-top:14px;padding:6px 16px">${lbl("DATOS ELECTORALES","")}${dato("Municipio",r.municipio)}${r.distrito?dato("Distrito municipal",r.distrito):""}${dato("Sector",r.sector)}${dato("Circunscripción",r.circ)}${dato("Estado",r.estado)}${dato("Reclutador",recName(r))}${dato("Fecha y hora",new Date(r.fecha).toLocaleString("es-DO"))}</div></div>
- <div style="padding:12px 0 calc(env(safe-area-inset-bottom) + 14px);border-top:1px solid #EEF0F3"><button class="btn btn-dark" id="dpdf" style="margin:0;display:flex;align-items:center;justify-content:center;gap:10px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.500 10.500L12 15l4.500-4.500"/><path d="M5 19h14"/></svg> Descargar PDF</button></div></section>`,(w)=>{$("#dpdf",w).onclick=()=>pdfExpediente(r)})}
+ <div style="padding:12px 0 calc(env(safe-area-inset-bottom) + 14px);border-top:1px solid #EEF0F3"><button class="btn btn-dark" id="dpdf" style="margin:0;display:flex;align-items:center;justify-content:center;gap:10px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.500 10.500L12 15l4.500-4.500"/><path d="M5 19h14"/></svg> Descargar PDF</button></div></section>`,(w,close)=>{$("#dpdf",w).onclick=()=>pdfExpediente(r);
+  const del=$("#delReg",w);if(del)del.onclick=()=>{if(!confirm("¿Desea eliminar el registro de "+r.nombre+"?\n\nSe quitará también su firma. Esta acción no se puede deshacer."))return;
+   db.__skipDel=db.__skipDel||{};db.__skipDel[r.id]=true;
+   db.records=db.records.filter(x=>x.id!==r.id);
+   try{window.FASync&&FASync.deleteRecord(r.id)}catch(e){}
+   logA("Eliminación de registro",r.id,r.nombre+" · "+r.cedula);
+   save();close();toast("Registro eliminado");go(cur==="firmas"?"firmas":cur==="reg"?"reg":"dash")}})}
 
 /* ---- PDF de expediente: profesional, evidencia ---- */
 function pdfExpediente(r){if(!window.jspdf)return toast("Cargando exportador, intente de nuevo");const {jsPDF}=window.jspdf;const d=new jsPDF({unit:"mm",format:"a4"});const W=210,M=14;
@@ -278,11 +311,18 @@ function vConfig(){const u=me();const can=db.users.length&&ROLES[u.rol].p.includ
  const avatar=u.foto?`<img src="${u.foto}">`:esc((u.nombre||"?")[0].toUpperCase());
  view.innerHTML=`<div class="pad"><div class="card" style="margin-top:0"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#10131A" stroke-width="1.7"><circle cx="10" cy="8" r="3.5"/><path d="M3 20c0-3.5 3-6 7-6"/><circle cx="18" cy="16" r="2.4"/></svg></div><div class="sheet-title"><h2 style="font-size:20px">Mi perfil</h2><p>Nombre, foto y datos del reclutador</p></div></div>
  <div class="avwrap"><div class="avatar" id="av">${avatar}</div><label class="avcam"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.9"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.4"/></svg><input type="file" accept="image/*" id="fFoto" hidden></label></div>
- <div class="fgrid2"><div><label>Nombre</label><input type="text" id="pn" value="${esc(u.nombre)}"><div><label>Organización</label><input type="text" id="po" value="${esc(db.org)}" placeholder="Nombre de su organización" ${me().rol==="administrador"?"":"disabled"}></div></div>
- <div><label>Cédula de identidad</label><input type="text" id="pc" inputmode="numeric" maxlength="13" placeholder="000-0000000-0" value="${esc(u.cedula||"")}"></div>
- <div><label>WhatsApp del reclutador</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">${WAI(22,"#25D366")}</span><input type="tel" id="pw" inputmode="tel" placeholder="809-000-0000" value="${esc(u.whatsapp||"")}" style="padding-left:48px"></div></div>
- <div><label>Provincia</label><select id="pp"><option value="">Seleccione</option>${PROVS.map(p=>`<option ${u.provincia===p?"selected":""}>${p}</option>`).join("")}</select></div>
- <div><label>Municipio</label><select id="pm"><option value="">Seleccione</option>${(MUNIS[u.provincia]||[]).map(m=>`<option ${m===u.municipio?"selected":""}>${m}</option>`).join("")}</select></div></div>
+ ${(()=>{const adm=me().rol==="administrador",rc=esRecolector();const ro=rc?"disabled":"";
+  return `<div class="fgrid2">
+   <div><label>Nombre</label><input type="text" id="pn" value="${esc(u.nombre)}" ${ro}></div>
+   <div><label>Provincia</label><select id="pp" ${ro}><option value="">Seleccione</option>${PROVS.map(p=>`<option ${u.provincia===p?"selected":""}>${p}</option>`).join("")}</select></div>
+   <div><label>Municipio</label><select id="pm" ${ro}><option value="">Seleccione</option>${(MUNIS[u.provincia]||[]).map(m=>`<option ${m===u.municipio?"selected":""}>${m}</option>`).join("")}</select></div>
+   ${adm?`<div><label>Organización</label><input type="text" id="po" value="${esc(db.org)}" placeholder="Nombre de su organización"></div>`:""}
+   <div><label>Cédula de identidad</label><input type="text" id="pc" inputmode="numeric" maxlength="13" placeholder="000-0000000-0" value="${esc(u.cedula||"")}" ${ro}></div>
+   <div><label>WhatsApp</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">${WAI(22,"#25D366")}</span><input type="tel" id="pw" inputmode="tel" placeholder="809-000-0000" value="${esc(u.whatsapp||"")}" style="padding-left:46px"></div></div>
+  </div>${rc?'<p class="pin-note" style="margin:8px 2px 0">Como recolector puede actualizar su foto y su WhatsApp. Los demás datos los gestiona la administración.</p>':""}`})()}
+ <div class="card" style="margin-top:14px"><b style="font-size:17px">Alertas y sonidos</b><p class="sub" style="font-size:14px;margin:6px 0 12px">Elija cómo quiere que el teléfono le avise.</p>
+  <div class="kv" style="align-items:center"><span>Sonidos de notificación</span><label class="sw"><input type="checkbox" id="swSound" ${(window.FANotif&&FANotif.prefs().sound!==false)?"checked":""}><i></i></label></div>
+  <div class="kv" style="align-items:center"><span>Vibración</span><label class="sw"><input type="checkbox" id="swVibra" ${(window.FANotif&&FANotif.prefs().vibra!==false)?"checked":""}><i></i></label></div></div>
  <button class="btn btn-dark" id="ps">Guardar perfil</button></div>
  <div class="card"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#10131A" stroke-width="1.7"><path d="M12 3l8 3v6c0 4.5-3.200 8-8 9-4.800-1-8-4.500-8-9V6l8-3z"/></svg></div><div class="sheet-title"><h2 style="font-size:20px">Roles y permisos</h2></div></div>
  ${Object.entries(ROLES).filter(([k])=>k===u.rol).map(([k,r])=>`<div class="role ${u.rol===k?"on":""}"><h3>${r.n}${u.rol===k?"<em>Actual</em>":""}</h3><p>${r.d}</p>${r.p.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`).join("")}</div>
@@ -292,6 +332,9 @@ function vConfig(){const u=me();const can=db.users.length&&ROLES[u.rol].p.includ
  $$(".urol").forEach(s=>s.onchange=()=>{const x=db.users.find(y=>y.id===s.dataset.uid);x.rol=s.value;logA("Cambio de permisos / config",x.id,"Permisos rol "+x.rol+" para "+x.nombre);toast("Rol actualizado");vConfig()});
  $$(".utog").forEach(b=>b.onclick=()=>{const x=db.users.find(y=>y.id===b.dataset.uid);x.activo=!x.activo;logA("Cambio de permisos / config",x.id,(x.activo?"Activación de ":"Suspensión de ")+x.nombre);toast(x.activo?"Acceso activado":"Acceso suspendido");vConfig()});
  if($("#addU"))$("#addU").onclick=()=>{const n=prompt("Nombre del reclutador:");if(!n||!n.trim())return;const id="U-"+(db.users.length+1);db.users.push({id,nombre:n.trim(),rol:"recolector",whatsapp:"",provincia:"",municipio:"",activo:true,nuevo:true});logA("Cambio de permisos / config",id,"Alta de reclutador "+n.trim());toast("Reclutador agregado");vConfig()};
+ $("#swSound").onchange=e=>{const p=window.FANotif?FANotif.prefs():{};p.sound=e.target.checked;FANotif.setPrefs(p);if(e.target.checked)FANotif.alert("success");toast(e.target.checked?"Sonido activado":"Sonido desactivado")};
+ $("#swVibra").onchange=e=>{const p=window.FANotif?FANotif.prefs():{};p.vibra=e.target.checked;FANotif.setPrefs(p);if(e.target.checked)FANotif.alert("success");toast(e.target.checked?"Vibración activada":"Vibración desactivada")};
+
  $("#cr").onclick=()=>{if(confirm("¿Borrar todos los registros locales?")){localStorage.removeItem(KEY);location.reload()}}}
 
 /* ---- Registros (buscador + filtro + tarjetas) ---- */
@@ -300,7 +343,7 @@ function vReg(){view.innerHTML=`<div class="pad"><div class="card" style="margin
  <select id="est" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Estado</option><option value="verificado">Validado</option><option value="pendiente">Pendiente</option><option value="duplicado">Duplicado</option></select><select id="rec" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Recolector</option>${db.users.map(u=>`<option value="${u.id}">${esc(u.nombre)}</option>`).join("")}</select></div></div>
  <div class="rgrid" id="lista" style="margin-top:16px"></div></div>`;
  $("#est").value=fE;if($("#rec"))$("#rec").value=fR;const draw=()=>{fQ=$("#q").value;fE=$("#est").value;fR=$("#rec")?$("#rec").value:"";const q=fQ.toLowerCase().replace(/-/g,"");
-  const L=db.records.filter(r=>(!fE||r.estado===fE)&&(!fR||String(r.rec)===fR||recName(r)===((db.users.find(u=>u.id===fR)||{}).nombre))&&(!q||(r.nombre+" "+r.cedula).toLowerCase().replace(/-/g,"").includes(q))).slice().reverse();
+  const L=myRecords().filter(r=>(!fE||r.estado===fE)&&(!fR||String(r.rec)===fR||recName(r)===((db.users.find(u=>u.id===fR)||{}).nombre))&&(!q||(r.nombre+" "+r.cedula).toLowerCase().replace(/-/g,"").includes(q))).slice().reverse();
   $("#lista").innerHTML=L.map(r=>{const v=r.estado==="verificado",d=r.estado==="duplicado";return `<div class="card" data-id="${r.id}" style="margin:0;cursor:pointer;padding:18px;min-width:0">
    <div style="display:flex;justify-content:space-between;gap:8px"><div style="min-width:0"><b style="font-size:16px;text-transform:uppercase;font-weight:500;overflow-wrap:anywhere">${esc(r.nombre)}</b><div style="color:#6B7280;font-size:14px;margin-top:5px">${esc(recName(r))}</div></div>
    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="chipx" style="background:${v?"#E3F7EE":d?"#FCE9E8":"#FDF3DD"};border-color:${v?"#BFEBD6":d?"#F6CFCC":"#EEDDB0"};color:${v?"#0A7A52":d?"#B3261E":"#B4640B"}">${v?"Validado":d?"Duplicado":"Pendiente"}</span></div></div>
@@ -320,7 +363,7 @@ function ficha(id){const r=db.records.find(x=>x.id===id);
  const tipo=r.auto?"Auto registro":"Promotor",val=r.estado==="verificado";
  dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:93vh;display:flex;flex-direction:column;padding-bottom:0">
  <div class="sheet-head" style="padding-bottom:14px;border-bottom:1px solid #EEF0F3">
- <div class="sheet-title"><h2 style="font-size:18px;text-transform:uppercase">${esc(r.nombre)}</h2><div style="display:flex;gap:8px;margin-top:6px"><span style="background:#F1F2F5;border:1px solid #E1E4EA;border-radius:99px;padding:4px 12px;font-size:13px;color:#3A3F4A">${tipo}</span><span style="background:${val?"#E3F7EE":r.estado==="duplicado"?"#FCE9E8":"#FDF3DD"};border:1px solid ${val?"#BFEBD6":"#EEDDB0"};border-radius:99px;padding:4px 12px;font-size:13px;color:${val?"#0A7A52":r.estado==="duplicado"?"#B3261E":"#B4640B"}">${val?"Validado":r.estado==="duplicado"?"Duplicado":"Pendiente"}</span></div></div><button class="iconbtn" data-x>✕</button></div>
+ <div class="sheet-title"><h2 style="font-size:18px;text-transform:uppercase">${esc(r.nombre)}</h2><div style="display:flex;gap:8px;margin-top:6px"><span style="background:#F1F2F5;border:1px solid #E1E4EA;border-radius:99px;padding:4px 12px;font-size:13px;color:#3A3F4A">${tipo}</span><span style="background:${val?"#E3F7EE":r.estado==="duplicado"?"#FCE9E8":"#FDF3DD"};border:1px solid ${val?"#BFEBD6":"#EEDDB0"};border-radius:99px;padding:4px 12px;font-size:13px;color:${val?"#0A7A52":r.estado==="duplicado"?"#B3261E":"#B4640B"}">${val?"Validado":r.estado==="duplicado"?"Duplicado":"Pendiente"}</span><button id="delReg" title="Eliminar registro" aria-label="Eliminar registro" style="border:1px solid #F6CFCC;background:#FCE9E8;color:#B3261E;border-radius:99px;padding:4px 11px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#B3261E" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Eliminar</button></div></div><button class="iconbtn" data-x>✕</button></div>
  <div style="overflow-y:auto;flex:1;padding:4px 0 20px">
  ${fila(USR0,"Nombre completo",esc(r.nombre).toUpperCase())}${fila(USR0,"Cédula",esc(r.cedula))}${fila(TEL,"WhatsApp",esc(r.whatsapp))}${fila(CASA,"Dirección",esc(r.direccion).toUpperCase())}${fila(PIN,"Municipio",esc(r.municipio).toUpperCase())}${r.distrito&&r.distrito.trim()?fila(PIN,"Distrito municipal",esc(r.distrito).toUpperCase()):""}${fila(PIN,"Sector",esc(r.sector).toUpperCase())}
  ${fila(PIN,"Circunscripción","Circunscripción "+esc(r.circ),'<button id="edCirc" style="border:0;background:none;font-size:15px;color:#10131A;cursor:pointer;font-family:inherit"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.500 9.500a2.100 2.100 0 0 0 0-3l-1-1a2.100 2.100 0 0 0-3 0L4 16z"/><path d="M13 7l4 4"/></svg> Editar</button>')}
@@ -340,7 +383,7 @@ function vAdmin(){const A=db.audit;const ok=A.filter(x=>x.ok).length;
  <div class="card" style="padding:0;overflow:hidden"><div class="scrollx ascroll"><table class="atable"><thead><tr><th>Usuario</th><th>Acción</th><th>Registro</th><th>Detalles</th><th>Resultado</th><th>Fecha/Hora</th></tr></thead><tbody>
  ${A.map(x=>`<tr><td><b>${esc(x.u)}</b></td><td>${esc(x.a)}</td><td class="mono">${esc(x.reg)}</td><td>${esc(x.det)}</td><td style="color:${x.ok?"#059B69":"#B3261E"};font-weight:600">${x.ok?"Éxito":"Fallo"}</td><td style="white-space:nowrap">${new Date(x.t).toLocaleString("es-DO")}</td></tr>`).join("")||'<tr><td colspan="6" style="text-align:center;color:#8A909C">Sin eventos.</td></tr>'}</tbody></table></div></div>
  <div class="card"><b style="font-size:18px">Revisión de firmas</b><p class="sub" style="font-size:15px;margin:6px 0 0">Valide cada registro o márquelo como duplicado.</p><div class="revgrid">
- ${db.records.map(r=>`<div class="item" style="margin-top:10px"><div style="min-width:0"><b style="font-size:15px">${esc(r.nombre)}</b><small>${esc(r.cedula)} · ${r.estado}</small></div><div style="display:flex;gap:6px"><button class="btn btn-light sm" data-a="ok" data-id="${r.id}" aria-label="Validar" title="Validar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></button><button class="btn btn-light sm" data-a="dup" data-id="${r.id}" aria-label="Marcar duplicado" title="Marcar duplicado"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.500" y="8.500" width="11" height="11" rx="2.500"/><path d="M15.500 8.500V6.500a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></div></div>`).join("")}</div>
+ ${db.records.slice(-3).reverse().map(r=>`<div class="item" style="margin-top:10px"><div style="min-width:0"><b style="font-size:15px">${esc(r.nombre)}</b><small>${esc(r.cedula)} · ${r.estado}</small></div><div style="display:flex;gap:6px"><button class="btn btn-light sm" data-a="ok" data-id="${r.id}" aria-label="Validar" title="Validar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></button><button class="btn btn-light sm" data-a="dup" data-id="${r.id}" aria-label="Marcar duplicado" title="Marcar duplicado"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.500" y="8.500" width="11" height="11" rx="2.500"/><path d="M15.500 8.500V6.500a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></div></div>`).join("")}</div>
 </div> <div class="two" style="margin-top:14px"><button class="btn btn-dark" id="btnPdf">Exportar expedientes</button><button class="btn btn-light" id="btnCsv" style="border:1px solid #E1E4EA">Exportar bitácora CSV</button></div></div>`;
  $$("[data-a]").forEach(b=>b.onclick=()=>{const r=db.records.find(x=>x.id===b.dataset.id);r.estado=b.dataset.a==="ok"?"verificado":"duplicado";logA("Cambio de estado",r.id,r.cedula+" → "+r.estado);toast("Registro actualizado");vAdmin()});
  $("#btnPdf").onclick=exportPdf;$("#btnCsv").onclick=()=>{const csv=["usuario,accion,registro,detalles,resultado,fecha"].concat(A.map(x=>[x.u,x.a,x.reg,x.det,x.ok?"Exito":"Fallo",new Date(x.t).toISOString()].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(","))).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="firmabal-auditoria.csv";a.click()}}
@@ -449,7 +492,7 @@ function renderWiz(){const s=wiz.step,bar=head(s);
   <label>Circunscripción</label><input type="text" id="fCirc" value="${esc(wiz.d.circ||"4")}">
   <button class="btn btn-dark" id="next">Continuar</button></div>`;
  if(s===4)view.innerHTML=`<div class="pad">${bar}<h1>Firma manuscrita</h1><p class="sub">El ciudadano firma en pantalla</p><canvas id="sig"></canvas>
-  <div style="display:flex;gap:10px"><button class="btn btn-light" id="clr">Borrar</button><button class="btn btn-dark" id="next">Guardar registro</button></div></div>`;
+  <div style="display:flex;gap:10px"><button class="btn btn-light" id="clr">Borrar</button><button class="btn btn-dark" id="next">Guardar</button></div></div>`;
  bindWiz()}
 /* Consentimiento: bottom sheet "Proteccion de datos" */
 function consentSheet(onOk){dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:92vh;display:flex;flex-direction:column"><div class="sheet-head"><div class="sheet-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></div><div class="sheet-title"><h2>Protección de datos</h2><p>Consentimiento del ciudadano</p></div><button class="iconbtn" data-x>✕</button></div>
@@ -466,7 +509,7 @@ function bindWiz(){const s=wiz.step,next=$("#next");
  if(s===2){const rd=f=>new Promise(r=>{const x=new FileReader();x.onload=()=>{const im=new Image();im.onload=()=>{const m=900,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.72))};im.onerror=()=>r(x.result);im.src=x.result};x.readAsDataURL(f)});
   $("#fFront").onchange=async e=>{if(e.target.files[0]){wiz.d.imgF=await rd(e.target.files[0]);renderWiz()}};$("#fBack").onchange=async e=>{if(e.target.files[0]){wiz.d.imgB=await rd(e.target.files[0]);renderWiz()}};
   next.onclick=async()=>{if(!wiz.d.imgF)return toast("Capture primero el frente de la cédula");$("#ocrMsg").textContent="Leyendo cédula con OCR…";
-   try{const txt=await puter.ai.chat("Extrae de esta cédula dominicana un JSON puro con llaves nombre, cedula, nac (AAAA-MM-DD), sexo (M/F), lugar. Sin texto adicional.",wiz.d.imgF);
+   try{const imgs=[wiz.d.imgF,wiz.d.imgB].filter(Boolean);const txt=await puter.ai.chat("Extrae de esta cédula dominicana un JSON puro con llaves nombre, cedula, nac (AAAA-MM-DD), sexo (M/F), lugar, direccion, municipio, sector. La direccion suele estar en el reverso; si no aparece déjala vacía. Sin texto adicional.",...imgs);
     const j=JSON.parse(String(txt?.message?.content??txt).replace(/```json|```/g,"").trim());Object.assign(wiz.d,j,{lock:true});toast("Datos extraídos")}
    catch(e){toast("No se pudo leer. Complete manualmente.")}
    wiz.step=3;renderWiz()}}
@@ -480,13 +523,17 @@ function bindWiz(){const s=wiz.step,next=$("#next");
   $("#clr").onclick=()=>{x.clearRect(0,0,c.width,c.height);has=false};
   next.onclick=()=>{if(!has)return toast("Se requiere la firma");const d=wiz.d;
    const rec={auto:!!d.auto,id:"R-"+Date.now(),nombre:d.nombre,cedula:d.cedula,nac:d.nac,sexo:d.sexo,lugar:d.lugar,whatsapp:d.whatsapp,direccion:d.direccion,municipio:d.municipio,distrito:d.distrito,sector:d.sector,circ:d.circ,firma:c.toDataURL("image/png"),imgFRONTAL:d.imgF||null,imgTRASERA:d.imgB||null,estado:d.dup?"duplicado":"pendiente",fecha:Date.now(),rec:d.recSrc||db.collector.id,lat:18.4861+(Math.random()-.5)*.08,lng:-69.9312+(Math.random()-.5)*.1};
-   db.records.push(rec);logA("Creación de registro",rec.id,"Cédula "+rec.cedula);save();if(AUTO){citizenDone();return}toast(d.dup?"Cédula ya registrada: marcada como duplicado":"Afiliación guardada");go("dash")}}}
+   db.records.push(rec);logA("Creación de registro",rec.id,"Cédula "+rec.cedula);save();try{window.FASync&&FASync.flush()}catch(e){}if(AUTO){citizenDone();return}try{window.FANotif&&FANotif.alert("success");window.FANotif&&FANotif.push({para:"admin",tipo:"registro",titulo:"Nuevo registro: "+rec.nombre,texto:recNombreTxt(rec),t:Date.now()})}catch(e){}toast(d.dup?"Cédula ya registrada: marcada como duplicado":"Afiliación guardada");go("dash")}}}
 
 if(new URLSearchParams(location.search).get("auto")){db.records.auto=true}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-if(LOGN){const u=db.users.find(x=>x.id===LOGN);if(!u){document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>Enlace de acceso no válido.</p>";return}
+if(LOGN){const u=db.users.find(x=>x.id===LOGN);if(!u){
+  document.body.innerHTML="<div style='min-height:100dvh;display:grid;place-items:center;font-family:sans-serif;color:#6B7280;text-align:center;padding:30px'><div><img src='icons/logo-badge-96.png' width='64' height='64' style='border-radius:18px'><p style='margin-top:14px'>Verificando su enlace…</p></div></div>";
+  (window.FASync?FASync.pull(db,save):Promise.resolve(false)).then(()=>{if(db.users.find(x=>x.id===LOGN))location.reload();else document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>Enlace de acceso no válido.</p>"}).catch(()=>{document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>No se pudo verificar el enlace. Revise su conexión e intente de nuevo.</p>"});
+  return}
  if(u.activo===false){document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>Su acceso está suspendido. Comuníquese con la administración.</p>";return}
  if(sessionStorage.getItem("fb-auth")!==u.id){loginRecolector(u);return}
  db.ses=u.id;save();if(u.nuevo!==false){onboarding(u);return}}
+if(window.FASync&&!AUTO)FASync.start(db,save,recName);
 if(AUTO){document.body.classList.add("citizen");citizenMode()}else goNow("dash");
 })();
