@@ -36,6 +36,16 @@ async function flush(){
   }catch(e){/* queda en cola */}finally{S.busy=false}
 }
 
+/* ---- alcance multi-organizacion ---- */
+const scope=()=>{
+  let oid="",uid="";
+  try{const raw=JSON.parse(localStorage.getItem("firmabal-db-v4")||"{}");}
+  catch(e){}
+  try{oid=localStorage.getItem("firmabal-org")||"";uid=localStorage.getItem("firmabal-uid")||""}catch(e){}
+  const r={};if(oid)r.org=oid;if(uid)r.uid=uid;return r;
+};
+const setScope=(oid,uid)=>{try{if(oid)localStorage.setItem("firmabal-org",oid);if(uid)localStorage.setItem("firmabal-uid",uid)}catch(e){}};
+
 /* ---- API publica ---- */
 const Sync={
   state:S,
@@ -49,9 +59,14 @@ const Sync={
   readNotif(nid,uid){enqueue("readNotif",{nid,uid})},
   audit(e){enqueue("logAudit",{entry:e})},
   login(uid,ult4){return call("login",{uid,ult4},15000)},
+  setScope,scope,
+  createOrg(nombre,admin,cedula,whatsapp){return call("createOrg",{nombre,admin,cedula,whatsapp},25000)},
+  createInvite(org,rol,by,nombre){return call("createInvite",{org,rol,by,nombre},25000)},
+  getInvite(token){return call("getInvite",{token},20000)},
+  acceptInvite(token,nombre,cedula,whatsapp){return call("acceptInvite",{token,nombre,cedula,whatsapp},25000)},
   /* Descarga de la nube y mezcla con lo local. Gana la nube para registros ya sincronizados. */
   async pull(db,save){
-    const j=await call("pull",{},30000);if(!j||!j.ok)return false;
+    const sc=scope();const j=await call("pull",sc,30000);if(!j||!j.ok)return false;
     const pend=new Set(q().filter(x=>x.action==="saveRecord").map(x=>x.payload.record.rid));
     const gone=new Set(j.deleted||[]);
     db.records=(db.records||[]).filter(r=>!gone.has(r.id));
@@ -84,6 +99,7 @@ const Sync={
   },
   flush,
   start(db,save,recName){
+    try{const u=(db.users||[]).find(x=>x.id===db.ses);if(u)setScope(u.org||"",u.id)}catch(e){}
     const tick=async()=>{try{await Sync.seed(db,recName);await flush();await Sync.pull(db,save)}catch(e){}};
     tick();setInterval(tick,20000);
     window.addEventListener("online",tick);

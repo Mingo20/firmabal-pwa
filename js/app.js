@@ -51,7 +51,8 @@ const REC=new URLSearchParams(location.search).get("rec")||"REC-001";
 const MENU=[["dash", "Inicio"], ["reg", "Registros"], ["captura", "Captura"], ["monitor", "Monitor"], ["terr", "Territorios"], ["recol", "Recolectores"], ["firmas", "Firmas"], ["audit", "Auditor\u00eda"], ["export", "Exportaci\u00f3n"], ["config", "Configuraci\u00f3n"]];
 const isToday=ts=>new Date(ts).toDateString()===new Date().toDateString();
 const stats=()=>({total:db.records.length,hoy:db.records.filter(r=>isToday(r.fecha)).length,pen:db.records.filter(r=>r.estado==="pendiente").length,dup:db.records.filter(r=>r.estado==="duplicado").length,auto:db.records.filter(r=>r.auto).length});
-const recName=r=>{const u=db.users.find(x=>x.id===r.rec||x.id===String(r.rec).replace("REC-","U-"));return u?u.nombre:(r.rec||"—")};
+const recBase=r=>{const id=String(r.rec||"");const u=db.users.find(x=>x.id===id||x.id===id.replace("REC-","U-"))||(id==="REC-001"?db.users.find(x=>x.id==="U-1"):null);return u?u.nombre:((db.cloud&&r.rec_nombre)||r.rec_nombre||"")};
+const recName=r=>{const b=recBase(r);return b?"REC- "+b:(r.rec&&!/^REC-\d+$/.test(String(r.rec))?"REC- "+r.rec:"REC- Domingo Guerra")};
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let cur="dash",map=null,wiz=null;
 
@@ -83,7 +84,7 @@ terr:{t:"Territorios",d:"Registros agrupados por municipio, sector y circunscrip
 recol:{t:"Recolectores",d:"Equipo de captura y su rendimiento.",p:["Toque un reclutador para ver su rendimiento, cambiar su rol y estado, copiar su enlace único y escribirle por WhatsApp.","El botón + inferior agrega un nuevo reclutador."]},
 audit:{t:"Auditoría",d:"Bitácora de eventos y revisión de firmas.",p:["La tabla registra quién hizo qué, sobre qué registro, el resultado y la fecha. Deslice horizontalmente para ver todas las columnas.","En Revisión de firmas valide con el botón del check o marque duplicado con el botón de copias.","Exporte los expedientes en PDF o la bitácora en CSV."]},
 export:{t:"Exportación",d:"Descarga de expedientes y datos.",p:["PDF de todos los expedientes: un documento ordenado por afiliado.","CSV de registros: datos en hoja de cálculo."]},
-config:{t:"Configuración",d:"Su perfil y los accesos del equipo.",p:["Actualice su foto, nombre, WhatsApp, provincia y municipio.","Roles y permisos muestra qué puede hacer cada rol.","El administrador asigna roles y activa o suspende reclutadores."]}
+config:{t:"Configuración",d:"Su perfil y los accesos del equipo.",p:["Actualice su foto, nombre, WhatsApp, provincia y municipio.","El administrador asigna roles y activa o suspende reclutadores."]}
 };
 function ayuda(){const h=HELP[cur]||HELP.dash;dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:88vh;overflow-y:auto"><div class="sheet-head"><div class="sheet-title"><h2>${h.t}</h2><p>${h.d}</p></div><button class="iconbtn" data-x>${XI}</button></div>
  <div class="help-box" style="margin-top:14px"><div class="help-sec" style="margin:0"><h4>Cómo usar esta pantalla</h4><ol style="padding-left:20px;margin:8px 0 0">${h.p.map(x=>`<li>${x}</li>`).join("")}</ol></div></div></section>`)}
@@ -152,39 +153,68 @@ function goNow(v){if(!can(v)){toast("Su rol no tiene acceso a esta pantalla");re
 
 /* ---- Centro de control ---- */
 /* ---- Mapa de cobertura nacional: provincia > municipio > distrito/sector ---- */
-let covMap=null,covLv={p:null,m:null};
+let covMap=null,covLv={p:null,m:null,d:null};
 const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 function provDe(r){if(r.provincia&&GEO[r.provincia])return r.provincia;const m=norm(r.municipio);if(!m)return null;for(const [p,v] of Object.entries(GEO)){if(norm(p)===m)return p;for(const mu of Object.keys(v[2])){const n=norm(mu);if(n===m||m.includes(n)||(n.includes(m)&&m.length>5))return p}}return null}
 function munDe(r,p){const m=norm(r.municipio);if(!p||!GEO[p]||!m)return null;for(const mu of Object.keys(GEO[p][2])){const n=norm(mu);if(n===m||m.includes(n)||(n.includes(m)&&m.length>5))return mu}return null}
-function covData(){const P={};let sinUbic=0;db.records.forEach(r=>{const p=provDe(r);if(!p){sinUbic++;return}
-  const m=munDe(r,p)||"(otro municipio)";const area=((r.distrito||"").trim())||((r.sector||"").trim())||"Sin sector";
-  P[p]=P[p]||{n:0,M:{}};P[p].n++;P[p].M[m]=P[p].M[m]||{n:0,S:{}};P[p].M[m].n++;const C=P[p].M[m].C||(P[p].M[m].C={});const c0=C[area]||(C[area]={n:0,la:0,lo:0});c0.n++;if(r.lat&&r.lng){c0.la+=r.lat;c0.lo+=r.lng;c0.g=true}P[p].M[m].S[area]=(P[p].M[m].S[area]||0)+1});return {P,sinUbic}}
+/* Agrupa registros: provincia > municipio > distrito municipal > sector, con centro real por promedio de coordenadas */
+function covData(){const P={};let sinUbic=0;
+ const add=(o,k,r)=>{const x=o[k]||(o[k]={n:0,la:0,lo:0,g:0,C:{}});x.n++;if(r.lat&&r.lng){x.la+=r.lat;x.lo+=r.lng;x.g++}return x};
+ (db.records||[]).forEach(r=>{const p=provDe(r);if(!p){sinUbic++;return}
+  const m=munDe(r,p)||"(otro municipio)";const dm=(r.distrito||"").trim()||"Sin distrito";const sc=(r.sector||"").trim()||"Sin sector";
+  const pp=add(P,p,r);const mm=add(pp.C,m,r);const dd=add(mm.C,dm,r);add(dd.C,sc,r)});
+ return {P,sinUbic}}
+const centroDe=(x,fb)=>x&&x.g?[x.la/x.g,x.lo/x.g]:fb;
+function covHalo(n,max){const t=Math.max(0,Math.min(1,n/Math.max(1,max)));return {color:t>.66?"#10131A":t>.33?"#3A3F4A":"#0B9D6B",r:14+Math.round(t*26)}}
 function vCov(){const w=document.getElementById("covmap");if(!w)return;
  if(covMap){covMap.remove();covMap=null}
- covMap=L.map("covmap",{zoomControl:false,attributionControl:false,scrollWheelZoom:false,zoomSnap:.25}).setView([18.95,-70.35],7.2);
+ covMap=L.map("covmap",{zoomControl:false,attributionControl:false,scrollWheelZoom:false,zoomSnap:.25}).setView([18.95,-70.35],7.3);
  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(covMap);
  L.control.zoom({position:"bottomright"}).addTo(covMap);
- const layer=L.layerGroup().addTo(covMap);const bar=document.getElementById("covbar");
- const bub=(pos,n,label,cls,fn)=>{const h=`<div class="covbub ${cls||""}">${n}<span>${esc(label)}</span></div>`;const mk=L.marker(pos,{icon:L.divIcon({className:"",html:h,iconSize:null,iconAnchor:[20,14]})}).addTo(layer);if(fn)mk.on("click",fn);return mk};
+ const layer=L.layerGroup().addTo(covMap);const bar=document.getElementById("covbar"),note=document.getElementById("covnote");
+ const NAC=[18.95,-70.35];
+ const fly=(c,z)=>{try{covMap.flyTo(c,z,{duration:.85})}catch(e){covMap.setView(c,z)}};
+ const bub=(pos,n,label,max,fn)=>{const h=covHalo(n,max);const d=h.r*2;
+  const html=`<div class="cvb" style="--c:${h.color}"><i class="cvh" style="width:${d+34}px;height:${d+34}px"></i><b>${n}</b><span class="cvt">${esc(label)} · ${n} ${n===1?"miembro":"miembros"}</span></div>`;
+  const mk=L.marker(pos,{icon:L.divIcon({className:"",html,iconSize:[0,0]})}).addTo(layer);
+  mk.on("click",e=>{const el=mk.getElement();if(el){document.querySelectorAll(".cvb.tip").forEach(x=>x.classList.remove("tip"));const c=el.querySelector(".cvb");if(c)c.classList.add("tip")}if(fn)fn()});return mk};
+ const nivel=()=>covLv.d?"sector":covLv.m?"distrito":covLv.p?"municipio":"provincia";
+ const back=()=>{if(covLv.d){covLv.d=null;const {P}=covData();const g=GEO[covLv.p];const m=(P[covLv.p]||{C:{}}).C[covLv.m];fly(centroDe(m,g[2][covLv.m]||[g[0],g[1]]),13)}else if(covLv.m){covLv.m=null;const g=GEO[covLv.p];fly([g[0],g[1]],10)}else if(covLv.p){covLv.p=null;fly(NAC,7.3)}draw()};
  const draw=()=>{layer.clearLayers();const {P,sinUbic}=covData();const tot=db.records.length;
-  const crumbs=[`<button class="covpill" data-lv="n">Nacional · ${tot}</button>`];
-  if(covLv.p)crumbs.push(`<button class="covpill" data-lv="p">${esc(covLv.p)} · ${(P[covLv.p]||{n:0}).n}</button>`);
-  if(covLv.m)crumbs.push(`<span class="covpill ghost">${esc(covLv.m)} · ${((P[covLv.p]||{M:{}}).M[covLv.m]||{n:0}).n}</span>`);
-  bar.innerHTML=crumbs.join("")+(sinUbic&&!covLv.p?`<span class="covpill ghost" title="Registros cuyo municipio no pudo ubicarse">Sin ubicar · ${sinUbic}</span>`:"");
-  $$("[data-lv]",bar).forEach(b=>b.onclick=()=>{if(b.dataset.lv==="n"){covLv={p:null,m:null};covMap.flyTo([18.95,-70.35],7.2,{duration:.9})}else{covLv.m=null;const g=GEO[covLv.p];covMap.flyTo([g[0],g[1]],10,{duration:.9})}draw()});
-  if(!covLv.p){Object.entries(P).forEach(([p,d])=>{const g=GEO[p];bub([g[0],g[1]],d.n,p,"",()=>{covLv.p=p;covMap.flyTo([g[0],g[1]],10,{duration:.9});draw()})});
-   if(!Object.keys(P).length)bub([18.95,-70.35],0,"Sin registros ubicados","g")}
-  else if(!covLv.m){const g=GEO[covLv.p],d=P[covLv.p]||{M:{}};Object.entries(d.M).forEach(([m,v],i)=>{const c=g[2][m]||[g[0]+Math.sin(i*2.4)*.05,g[1]+Math.cos(i*2.4)*.05];bub(c,v.n,m,"g",()=>{covLv.m=m;covMap.flyTo(c,12.5,{duration:.9});draw()})})}
-  else{const g=GEO[covLv.p],c=g[2][covLv.m]||[g[0],g[1]],S=((P[covLv.p]||{M:{}}).M[covLv.m]||{S:{}}).S;const ks=Object.keys(S);
-   ks.forEach((s,i)=>{const a=(i/Math.max(1,ks.length))*Math.PI*2,rad=ks.length>1?.012:0;const cc=(((P[covLv.p]||{}).M||{})[covLv.m]||{}).C||{};const g2=cc[s];const pos=(g2&&g2.g)?[g2.la/g2.n,g2.lo/g2.n]:[c[0]+Math.sin(a)*rad,c[1]+Math.cos(a)*rad*1.1];bub(pos,S[s],s,'g')})}};
+  const crumbs=[`<button class="cc" data-lv="n">República Dominicana</button>`];
+  if(covLv.p)crumbs.push(`<button class="cc" data-lv="p">${esc(covLv.p)}</button>`);
+  if(covLv.m)crumbs.push(`<button class="cc" data-lv="m">${esc(covLv.m)}</button>`);
+  if(covLv.d)crumbs.push(`<span class="cc on">${esc(covLv.d)}</span>`);
+  const nv=nivel();const titulo=covLv.d||covLv.m||covLv.p||"Distribución nacional";
+  bar.innerHTML=`<div class="covtop"><div class="covtit"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#10131A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L3.5 6.8v12.7L9 17.2l6 2.3 5.5-2.3V4.5L15 6.8z"/><path d="M9 4.5v12.7M15 6.8v12.7"/></svg><b>${esc(titulo)}</b></div>${covLv.p?'<button class="covback" data-lv="back">Volver al nivel anterior</button>':""}</div><div class="covtrail">${crumbs.map((c,i)=>(i?'<em>›</em>':"")+c).join("")}</div>`;
+  $$("[data-lv]",bar).forEach(b=>b.onclick=()=>{const k=b.dataset.lv;if(k==="back")return back();
+    if(k==="n"){covLv={p:null,m:null,d:null};fly(NAC,7.3)}else if(k==="p"){covLv.m=null;covLv.d=null;const g=GEO[covLv.p];fly([g[0],g[1]],10)}else if(k==="m"){covLv.d=null;const g=GEO[covLv.p];fly(g[2][covLv.m]||[g[0],g[1]],12.5)}draw()});
+  const leyenda={provincia:"Provincia con miembros registrados. Toca una burbuja para profundizar.",municipio:"Municipio con miembros registrados. Toca una burbuja para profundizar.",distrito:"Distrito municipal con miembros registrados. Toca una burbuja para profundizar.",sector:"Sector con miembros registrados."};
+  note.textContent=leyenda[nv]+(sinUbic&&!covLv.p?` (${sinUbic} sin ubicar)`:"");
+  if(!covLv.p){const max=Math.max(1,...Object.values(P).map(x=>x.n));
+    Object.entries(P).forEach(([p,d])=>{const g=GEO[p];bub(centroDe(d,[g[0],g[1]]),d.n,p,max,()=>{covLv.p=p;fly(centroDe(d,[g[0],g[1]]),10);draw()})});
+    if(!Object.keys(P).length)note.textContent="Aún no hay registros ubicados. Aparecerán aquí al capturar."}
+  else if(!covLv.m){const g=GEO[covLv.p],d=P[covLv.p]||{C:{}};const max=Math.max(1,...Object.values(d.C).map(x=>x.n));
+    Object.entries(d.C).forEach(([m,v],i)=>{const c=centroDe(v,g[2][m]||[g[0]+Math.sin(i*2.4)*.05,g[1]+Math.cos(i*2.4)*.05]);bub(c,v.n,m,max,()=>{covLv.m=m;fly(c,12.5);draw()})})}
+  else if(!covLv.d){const g=GEO[covLv.p],mm=((P[covLv.p]||{C:{}}).C[covLv.m])||{C:{}};const base=centroDe(mm,g[2][covLv.m]||[g[0],g[1]]);const ks=Object.keys(mm.C);const max=Math.max(1,...ks.map(k=>mm.C[k].n));
+    ks.forEach((k,i)=>{const v=mm.C[k];const a=(i/Math.max(1,ks.length))*Math.PI*2;const c=centroDe(v,[base[0]+Math.sin(a)*.012,base[1]+Math.cos(a)*.014]);bub(c,v.n,k,max,()=>{covLv.d=k;fly(c,14);draw()})})}
+  else{const g=GEO[covLv.p],mm=((P[covLv.p]||{C:{}}).C[covLv.m])||{C:{}},dd=mm.C[covLv.d]||{C:{}};const base=centroDe(dd,centroDe(mm,g[2][covLv.m]||[g[0],g[1]]));const ks=Object.keys(dd.C);const max=Math.max(1,...ks.map(k=>dd.C[k].n));
+    ks.forEach((k,i)=>{const v=dd.C[k];const a=(i/Math.max(1,ks.length))*Math.PI*2;const c=centroDe(v,[base[0]+Math.sin(a)*.006,base[1]+Math.cos(a)*.007]);bub(c,v.n,k,max,null)})}};
+ const loc=L.control({position:"topright"});if(loc.onAdd===undefined||true){try{loc.onAdd=()=>{const d=L.DomUtil.create("button","covloc");d.type="button";d.setAttribute("aria-label","Centrar mapa");d.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#10131A" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';d.onclick=ev=>{ev.stopPropagation();covLv={p:null,m:null,d:null};fly(NAC,7.3);draw()};return d};loc.addTo(covMap)}catch(e){}}
  draw();setTimeout(()=>covMap.invalidateSize(),250)}
 
-function vDash(){const s=stats();covLv={p:null,m:null};setTimeout(vCov,60);
- view.innerHTML=`<div class="pad"><div class="grid"><div class="stat dark"><small>Totales</small><b>${s.total}</b></div><div class="stat"><small>Capturados hoy</small><b>${s.hoy}</b></div>
- <div class="stat amber"><small>Pendientes</small><b>${s.pen}</b></div><div class="stat red"><small>Duplicados</small><b>${s.dup}</b></div>
- <div class="stat"><small>Auto registros</small><b>${s.auto}</b></div><div class="stat"><small>Recolectores</small><b>${db.users.filter(u=>u.activo).length}</b></div></div>
- <div class="card" style="padding:18px 16px 16px"><div style="display:flex;gap:10px;align-items:center;font-size:16px;font-weight:600;margin-bottom:12px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#10131A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L3.5 6.8v12.7L9 17.2l6 2.3 5.5-2.3V4.5L15 6.8z"/><path d="M9 4.5v12.7M15 6.8v12.7"/></svg>Cobertura nacional</div>
- <div class="covwrap"><div id="covmap"></div><div class="covbar" id="covbar"></div></div></div></div>`}
+function vDash(){const s=stats();covLv={p:null,m:null,d:null};setTimeout(vCov,60);
+ const act=db.users.filter(u=>u.activo).length;
+ view.innerHTML=`<div class="homewrap"><div class="covhead"><div class="covcrumb" id="covbar"></div></div><div class="covwrap2"><div id="covmap"></div></div>
+ <div class="covnote" id="covnote"></div></div>
+ <div class="krow">
+  <div class="kcard dark"><div class="ico">${ico("firmas",20,1.8,"#fff")}</div><b>${s.total}</b><span class="kcard-l">Registros totales</span></div>
+  <div class="kcard"><div class="ico">${ico("captura",20,1.8)}</div><b>${s.hoy}</b><span class="kcard-l">Capturados hoy</span></div>
+  <div class="kcard"><div class="ico">${ico("audit",20,1.8)}</div><b>${s.pen}</b><span class="kcard-l">Pendientes</span></div>
+  <div class="kcard"><div class="ico">${ico("reg",20,1.8)}</div><b>${s.dup}</b><span class="kcard-l">Duplicados</span></div>
+  <div class="kcard"><div class="ico">${ico("terr",20,1.8)}</div><b>${s.auto}</b><span class="kcard-l">Auto registros</span></div>
+  <div class="kcard"><div class="ico">${ico("recol",20,1.8)}</div><b>${act}</b><span class="kcard-l">Recolectores</span></div>
+ </div>`}
 
 function chart(){const d=last7().filter(x=>x.n>0).length?last7().filter(x=>x.n>0):last7().slice(-1);const mx=Math.max(2,...d.map(x=>x.n));const ticks=[mx,mx*.75,mx/2,mx/4,0].map(v=>Math.round(v*10)/10);
  return `<div style="display:flex;margin-top:18px;height:340px;position:relative"><div style="display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding-right:14px;color:#8A909C;font-size:15px;height:300px">${ticks.map(t=>`<span>${t}</span>`).join("")}</div>
@@ -233,8 +263,12 @@ function detalle(id){const r=db.records.find(x=>x.id===id);
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">${box("FRONTAL","imgFRONTAL")}${box("TRASERA","imgTRASERA")}</div>
   <div class="card" style="margin-top:18px;padding:6px 16px">${lbl("DATOS DEL FIRMANTE","")}${dato("Nombre",r.nombre)}${dato("Cédula",r.cedula)}${dato("Nacimiento",r.nac)}${dato("Sexo",r.sexo)}${dato("Lugar de nacimiento",r.lugar)}${dato("WhatsApp",r.whatsapp)}${dato("Dirección",r.direccion)}</div>
   <div class="card" style="margin-top:14px;padding:6px 16px">${lbl("DATOS ELECTORALES","")}${dato("Municipio",r.municipio)}${r.distrito?dato("Distrito municipal",r.distrito):""}${dato("Sector",r.sector)}${dato("Circunscripción",r.circ)}${dato("Estado",r.estado)}${dato("Reclutador",recName(r))}${dato("Fecha y hora",new Date(r.fecha).toLocaleString("es-DO"))}</div></div>
- <div style="padding:12px 0 calc(env(safe-area-inset-bottom) + 14px);border-top:1px solid #EEF0F3"><button class="btn btn-dark" id="dpdf" style="margin:0;display:flex;align-items:center;justify-content:center;gap:10px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.500 10.500L12 15l4.500-4.500"/><path d="M5 19h14"/></svg> Descargar PDF</button></div></section>`,(w,close)=>{$("#dpdf",w).onclick=()=>pdfExpediente(r);
-  const del=$("#delReg",w);if(del)del.onclick=()=>{if(!confirm("¿Desea eliminar el registro de "+r.nombre+"?\n\nSe quitará también su firma. Esta acción no se puede deshacer."))return;
+ <div style="padding:12px 0 calc(env(safe-area-inset-bottom) + 14px);border-top:1px solid #EEF0F3"><button class="btn btn-dark" id="dpdf" style="margin:0;display:flex;align-items:center;justify-content:center;gap:10px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.500 10.500L12 15l4.500-4.500"/><path d="M5 19h14"/></svg> Descargar PDF</button></div></section>`,(w,close)=>{$("#dpdf",w).onclick=async()=>{try{if(window.FAIdClean){for(const k of ["imgFRONTAL","imgTRASERA"]){if(r[k]&&!r["__c"+k]){r[k]=await FAIdClean.clean(r[k]);r["__c"+k]=1}}save()}}catch(e){}pdfExpediente(r)};
+  const dm=$("#dotsMenu",w),db2=$("#dotsReg",w);
+  if(db2)db2.onclick=e=>{e.stopPropagation();dm.hidden=!dm.hidden};
+  w.addEventListener("click",()=>{if(dm)dm.hidden=true});
+  const oc=$("#optCirc",w);if(oc)oc.onclick=()=>{dm.hidden=true;const e=$("#edCirc",w);if(e)e.click();else toast("No se puede editar este registro")};
+  const del=$("#delReg",w);if(del)del.onclick=()=>{dm.hidden=true;if(!confirm("¿Desea eliminar el registro de "+r.nombre+"?\n\nSe quitará también su firma. Esta acción no se puede deshacer."))return;
    db.__skipDel=db.__skipDel||{};db.__skipDel[r.id]=true;
    db.records=db.records.filter(x=>x.id!==r.id);
    try{window.FASync&&FASync.deleteRecord(r.id)}catch(e){}
@@ -307,6 +341,7 @@ function reclutador(id){const u=db.users.find(x=>x.id===id);const n=nReg(u),hoy=
 function qrModal(url,sub){dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61"><div class="sheet-head"><div class="sheet-ico">${ico("captura",22,1.8,"#fff")}</div><div class="sheet-title"><h2>Código QR</h2><p>${sub||"Escanee para autorregistrarse"}</p></div><button class="iconbtn" data-x>${XI}</button></div><div id="qq" style="display:grid;place-items:center;padding:22px 0"></div></section>`,w=>{try{new QRCode($("#qq",w),{text:url,width:230,height:230,colorDark:"#10131A",colorLight:"#ffffff"})}catch{$("#qq",w).textContent="No se pudo generar el QR sin conexión."}})}
 /* ---- Exportación ---- */
 function vExport(){view.innerHTML=`<div class="pad"><div class="agrid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))"><button class="btn btn-dark" id="e1" style="margin:0;display:flex;align-items:center;justify-content:center;gap:10px">${ico("export",22,1.8,"#fff")} PDF de todos los expedientes</button><button class="btn btn-light" id="e2" style="margin:0;border:1px solid #E1E4EA;display:flex;align-items:center;justify-content:center;gap:10px">${ico("export",22,1.8)} CSV de registros</button></div></div>`;$("#e1").onclick=exportPdf;$("#e2").onclick=exportCsv}
+const FASaasRoles={administrador:"Administrador",supervisor:"Supervisor",recolector:"Recolector",auditor:"Auditor"};
 function vConfig(){const u=me();const can=db.users.length&&ROLES[u.rol].p.includes("usuarios");
  const avatar=u.foto?`<img src="${u.foto}">`:esc((u.nombre||"?")[0].toUpperCase());
  view.innerHTML=`<div class="pad"><div class="card" style="margin-top:0"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#10131A" stroke-width="1.7"><circle cx="10" cy="8" r="3.5"/><path d="M3 20c0-3.5 3-6 7-6"/><circle cx="18" cy="16" r="2.4"/></svg></div><div class="sheet-title"><h2 style="font-size:20px">Mi perfil</h2><p>Nombre, foto y datos del reclutador</p></div></div>
@@ -324,9 +359,23 @@ function vConfig(){const u=me();const can=db.users.length&&ROLES[u.rol].p.includ
   <div class="kv" style="align-items:center"><span>Sonidos de notificación</span><label class="sw"><input type="checkbox" id="swSound" ${(window.FANotif&&FANotif.prefs().sound!==false)?"checked":""}><i></i></label></div>
   <div class="kv" style="align-items:center"><span>Vibración</span><label class="sw"><input type="checkbox" id="swVibra" ${(window.FANotif&&FANotif.prefs().vibra!==false)?"checked":""}><i></i></label></div></div>
  <button class="btn btn-dark" id="ps">Guardar perfil</button></div>
- <div class="card"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#10131A" stroke-width="1.7"><path d="M12 3l8 3v6c0 4.5-3.200 8-8 9-4.800-1-8-4.500-8-9V6l8-3z"/></svg></div><div class="sheet-title"><h2 style="font-size:20px">Roles y permisos</h2></div></div>
- ${Object.entries(ROLES).filter(([k])=>k===u.rol).map(([k,r])=>`<div class="role ${u.rol===k?"on":""}"><h3>${r.n}${u.rol===k?"<em>Actual</em>":""}</h3><p>${r.d}</p>${r.p.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`).join("")}</div>
+
+ ${me().rol==="administrador"?`<div class="card"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5">${ico("recol",22,1.8)}</div><div class="sheet-title"><h2 style="font-size:18px">Equipo e invitaciones</h2><p>Comparta un enlace personalizado según el rol</p></div></div>
+  <div id="invHost"></div></div>`:""}
  <button class="btn btn-red" id="cr">Borrar datos locales</button></div>`;
+ if($("#invHost")){const host=$("#invHost");
+  host.innerHTML=Object.keys(FASaasRoles).map(k=>`<div class="item" style="margin-top:10px;gap:10px"><div style="min-width:0"><b style="font-size:15px">${FASaasRoles[k]}</b><small>Enlace de acceso como ${FASaasRoles[k].toLowerCase()}</small></div><button class="btn btn-light sm" data-inv="${k}" style="border:1px solid #E1E4EA">Crear enlace</button></div>`).join("");
+  $$("[data-inv]",host).forEach(b=>b.onclick=async()=>{const rol=b.dataset.inv;const meU=me();
+   try{b.disabled=true;b.textContent="Creando…";
+    const lk=await window.FASaas.makeInvite(meU.org||db.orgId||"",rol,meU.id,"");
+    b.disabled=false;b.textContent="Crear enlace";
+    const box=document.createElement("div");box.className="card";box.style.marginTop="12px";box.style.padding="14px";
+    box.innerHTML=`<b style="font-size:14px">Enlace de ${FASaasRoles[rol]}</b><div style="word-break:break-all;font-size:12.5px;color:#5A6170;margin-top:6px">${lk}</div>
+      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-dark sm" id="cp">Copiar</button><button class="btn btn-wa sm" id="sh" style="display:flex;align-items:center;gap:6px">${WAI(18,"#fff")} WhatsApp</button></div>`;
+    host.appendChild(box);
+    box.querySelector("#cp").onclick=()=>{navigator.clipboard.writeText(lk).then(()=>toast("Enlace copiado")).catch(()=>toast("Copie el enlace manualmente"))};
+    box.querySelector("#sh").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent("Acceso FirmAbal como "+(FASaasRoles[rol]||rol)+": "+lk),"_blank");
+   }catch(e){b.disabled=false;b.textContent="Crear enlace";toast(e.message||"No se pudo crear el enlace")}})}
  $("#fFoto").onchange=e=>{const f=e.target.files[0];if(!f)return;const x=new FileReader();x.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=256;const g=c.getContext("2d"),k=Math.max(256/im.width,256/im.height);g.drawImage(im,(256-im.width*k)/2,(256-im.height*k)/2,im.width*k,im.height*k);u.foto=c.toDataURL("image/jpeg",.8);save();$("#av").innerHTML=`<img src="${u.foto}">`;toast("Foto actualizada")};im.src=x.result};x.readAsDataURL(f)};
  $("#pp").onchange=e=>{$("#pm").innerHTML='<option value="">Seleccione</option>'+(MUNIS[e.target.value]||[]).map(m=>`<option>${m}</option>`).join("")};$("#ps").onclick=()=>{const ced=($("#pc")?$("#pc").value:"").replace(/\D/g,"");if(ced&&ced.length!==11)return toast("La cédula debe tener 11 dígitos");if(ced){if(db.users.some(x=>x.id!==u.id&&String(x.cedula||"").replace(/\D/g,"")===ced))return toast("Esa cédula ya está registrada");u.cedula=ced.slice(0,3)+"-"+ced.slice(3,10)+"-"+ced.slice(10)}if($("#po")&&$("#po").value.trim())db.org=$("#po").value.trim();const wa=$("#pw").value.replace(/\D/g,"");if($("#pw").value&&wa.length<10)return toast("WhatsApp inválido (10 dígitos)");u.nombre=$("#pn").value.trim()||u.nombre;u.whatsapp=wa;u.provincia=$("#pp").value;u.municipio=$("#pm").value.trim();db.collector.name=u.nombre;logA("Cambio de permisos / config",u.id,"Perfil de "+u.nombre);toast("Perfil guardado");vConfig()};
  $$(".urol").forEach(s=>s.onchange=()=>{const x=db.users.find(y=>y.id===s.dataset.uid);x.rol=s.value;logA("Cambio de permisos / config",x.id,"Permisos rol "+x.rol+" para "+x.nombre);toast("Rol actualizado");vConfig()});
@@ -363,7 +412,7 @@ function ficha(id){const r=db.records.find(x=>x.id===id);
  const tipo=r.auto?"Auto registro":"Promotor",val=r.estado==="verificado";
  dyn(`<div class="dmask sheet-mask" style="z-index:60"></div><section class="dsheet sheet" style="z-index:61;max-height:93vh;display:flex;flex-direction:column;padding-bottom:0">
  <div class="sheet-head" style="padding-bottom:14px;border-bottom:1px solid #EEF0F3">
- <div class="sheet-title"><h2 style="font-size:18px;text-transform:uppercase">${esc(r.nombre)}</h2><div style="display:flex;gap:8px;margin-top:6px"><span style="background:#F1F2F5;border:1px solid #E1E4EA;border-radius:99px;padding:4px 12px;font-size:13px;color:#3A3F4A">${tipo}</span><span style="background:${val?"#E3F7EE":r.estado==="duplicado"?"#FCE9E8":"#FDF3DD"};border:1px solid ${val?"#BFEBD6":"#EEDDB0"};border-radius:99px;padding:4px 12px;font-size:13px;color:${val?"#0A7A52":r.estado==="duplicado"?"#B3261E":"#B4640B"}">${val?"Validado":r.estado==="duplicado"?"Duplicado":"Pendiente"}</span><button id="delReg" title="Eliminar registro" aria-label="Eliminar registro" style="border:1px solid #F6CFCC;background:#FCE9E8;color:#B3261E;border-radius:99px;padding:4px 11px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#B3261E" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Eliminar</button></div></div><button class="iconbtn" data-x>✕</button></div>
+ <div class="sheet-title"><h2 style="font-size:18px;text-transform:uppercase">${esc(r.nombre)}</h2><div style="display:flex;gap:8px;margin-top:6px"><span style="background:#F1F2F5;border:1px solid #E1E4EA;border-radius:99px;padding:4px 12px;font-size:13px;color:#3A3F4A">${tipo}</span><span style="background:${val?"#E3F7EE":r.estado==="duplicado"?"#FCE9E8":r.estado==="revision"?"#E8EEFB":"#FDF3DD"};border:1px solid ${val?"#BFEBD6":r.estado==="revision"?"#C9D6F4":"#EEDDB0"};border-radius:99px;padding:4px 12px;font-size:13px;color:${val?"#0A7A52":r.estado==="duplicado"?"#B3261E":r.estado==="revision"?"#2F5BC4":"#B4640B"}">${val?"Validado":r.estado==="duplicado"?"Duplicado":r.estado==="revision"?"En revisión":"Pendiente"}</span><div style="position:relative"><button id="dotsReg" aria-label="Más opciones" title="Más opciones" style="border:1px solid #E1E4EA;background:#F1F2F5;border-radius:99px;width:32px;height:28px;display:grid;place-items:center;cursor:pointer;padding:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="#3A3F4A"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button><div id="dotsMenu" hidden style="position:absolute;top:34px;left:0;min-width:210px;background:#fff;border:1px solid #E7E9EE;border-radius:16px;box-shadow:0 14px 34px rgba(16,19,26,.2);padding:6px;z-index:5"><button id="optCirc" style="display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:12px;border-radius:12px;font-family:inherit;font-size:15px;cursor:pointer;color:#10131A;text-align:left">Editar circunscripción</button><button id="delReg" style="display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:12px;border-radius:12px;font-family:inherit;font-size:15px;cursor:pointer;color:#B3261E;text-align:left">Eliminar registro</button></div></div></div></div><button class="iconbtn" data-x>✕</button></div>
  <div style="overflow-y:auto;flex:1;padding:4px 0 20px">
  ${fila(USR0,"Nombre completo",esc(r.nombre).toUpperCase())}${fila(USR0,"Cédula",esc(r.cedula))}${fila(TEL,"WhatsApp",esc(r.whatsapp))}${fila(CASA,"Dirección",esc(r.direccion).toUpperCase())}${fila(PIN,"Municipio",esc(r.municipio).toUpperCase())}${r.distrito&&r.distrito.trim()?fila(PIN,"Distrito municipal",esc(r.distrito).toUpperCase()):""}${fila(PIN,"Sector",esc(r.sector).toUpperCase())}
  ${fila(PIN,"Circunscripción","Circunscripción "+esc(r.circ),'<button id="edCirc" style="border:0;background:none;font-size:15px;color:#10131A;cursor:pointer;font-family:inherit"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.500 9.500a2.100 2.100 0 0 0 0-3l-1-1a2.100 2.100 0 0 0-3 0L4 16z"/><path d="M13 7l4 4"/></svg> Editar</button>')}
@@ -374,7 +423,7 @@ function ficha(id){const r=db.records.find(x=>x.id===id);
  $("#edCirc",w).onclick=()=>{close();setTimeout(()=>{dyn(`<div class="dmask sheet-mask" style="z-index:62"></div><section class="dsheet sheet" style="z-index:63;max-width:420px"><div class="sheet-head"><div class="sheet-title"><h2>Circunscripción</h2><p>Seleccione el número de la circunscripción electoral</p></div><button class="iconbtn" data-x>${XI}</button></div>
   <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:6px 0 10px">${[1,2,3,4,5,6,7].map(n=>`<button class="cbtn ${String(n)===String(r.circ)?"on":""}" data-n="${n}" style="border:1px solid ${String(n)===String(r.circ)?"#10131A":"#E1E4EA"};background:${String(n)===String(r.circ)?"#10131A":"#fff"};color:${String(n)===String(r.circ)?"#fff":"#3A3F4A"};border-radius:16px;padding:14px 0;font-size:18px;font-weight:600;cursor:pointer;font-family:inherit">${n}</button>`).join("")}</div>
   <button class="btn btn-dark" id="cs" style="width:100%;padding:15px">Guardar</button></section>`,(w2,close2)=>{let sel=String(r.circ);$$(".cbtn",w2).forEach(b=>b.onclick=()=>{sel=b.dataset.n;$$(".cbtn",w2).forEach(x=>{x.classList.toggle("on",x===b);x.style.borderColor=x===b?"#10131A":"#E1E4EA";x.style.background=x===b?"#10131A":"#fff";x.style.color=x===b?"#fff":"#3A3F4A"})});$("#cs",w2).onclick=()=>{if(!sel)return toast("Seleccione la circunscripción");r.circ=sel;logA("Cambio de circunscripción",r.id,"Circunscripción "+sel+" para cédula "+r.cedula);save();close2();toast("Circunscripción actualizada");setTimeout(()=>{ficha(id);if(cur==="reg")vReg()},450)}})},430)};
- $("#fpdf",w).onclick=()=>pdfExpediente(r)})}
+ $("#fpdf",w).onclick=async()=>{try{if(window.FAIdClean){for(const k of ["imgFRONTAL","imgTRASERA"]){if(r[k]&&!r["__c"+k]){r[k]=await FAIdClean.clean(r[k]);r["__c"+k]=1}}save()}}catch(e){}pdfExpediente(r)}})}
 
 /* ---- Admin / auditoría ---- */
 function vAdmin(){const A=db.audit;const ok=A.filter(x=>x.ok).length;
@@ -382,10 +431,10 @@ function vAdmin(){const A=db.audit;const ok=A.filter(x=>x.ok).length;
  <div class="kgrid3" style="margin-bottom:14px"><div class="stat dark"><small>Eventos</small><b>${A.length}</b></div><div class="stat"><small>Exitosos</small><b>${ok}</b></div><div class="stat red"><small>Fallidos</small><b>${A.length-ok}</b></div></div>
  <div class="card" style="padding:0;overflow:hidden"><div class="scrollx ascroll"><table class="atable"><thead><tr><th>Usuario</th><th>Acción</th><th>Registro</th><th>Detalles</th><th>Resultado</th><th>Fecha/Hora</th></tr></thead><tbody>
  ${A.map(x=>`<tr><td><b>${esc(x.u)}</b></td><td>${esc(x.a)}</td><td class="mono">${esc(x.reg)}</td><td>${esc(x.det)}</td><td style="color:${x.ok?"#059B69":"#B3261E"};font-weight:600">${x.ok?"Éxito":"Fallo"}</td><td style="white-space:nowrap">${new Date(x.t).toLocaleString("es-DO")}</td></tr>`).join("")||'<tr><td colspan="6" style="text-align:center;color:#8A909C">Sin eventos.</td></tr>'}</tbody></table></div></div>
- <div class="card"><b style="font-size:18px">Revisión de firmas</b><p class="sub" style="font-size:15px;margin:6px 0 0">Valide cada registro o márquelo como duplicado.</p><div class="revgrid">
- ${db.records.slice(-3).reverse().map(r=>`<div class="item" style="margin-top:10px"><div style="min-width:0"><b style="font-size:15px">${esc(r.nombre)}</b><small>${esc(r.cedula)} · ${r.estado}</small></div><div style="display:flex;gap:6px"><button class="btn btn-light sm" data-a="ok" data-id="${r.id}" aria-label="Validar" title="Validar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></button><button class="btn btn-light sm" data-a="dup" data-id="${r.id}" aria-label="Marcar duplicado" title="Marcar duplicado"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.500" y="8.500" width="11" height="11" rx="2.500"/><path d="M15.500 8.500V6.500a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></div></div>`).join("")}</div>
+ <div class="card"><b style="font-size:18px">Revisión de firmas</b><p class="sub" style="font-size:15px;margin:6px 0 0">Valide o márquelo como duplicado</p><div class="revgrid">
+ ${db.records.slice(-3).reverse().map(r=>`<div class="item" style="margin-top:10px"><div style="min-width:0"><b style="font-size:15px">${esc(r.nombre)}</b><small>${esc(r.cedula)} · ${r.estado==="revision"?"en revisión":r.estado}</small></div><div style="display:flex;gap:6px"><button class="btn btn-light sm" data-a="rev" data-id="${r.id}" aria-label="Marcar en revisión" title="En revisión"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button><button class="btn btn-light sm" data-a="ok" data-id="${r.id}" aria-label="Validar" title="Validar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></button><button class="btn btn-light sm" data-a="dup" data-id="${r.id}" aria-label="Marcar duplicado" title="Marcar duplicado"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.500" y="8.500" width="11" height="11" rx="2.500"/><path d="M15.500 8.500V6.500a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></div></div>`).join("")}</div>
 </div> <div class="two" style="margin-top:14px"><button class="btn btn-dark" id="btnPdf">Exportar expedientes</button><button class="btn btn-light" id="btnCsv" style="border:1px solid #E1E4EA">Exportar bitácora CSV</button></div></div>`;
- $$("[data-a]").forEach(b=>b.onclick=()=>{const r=db.records.find(x=>x.id===b.dataset.id);r.estado=b.dataset.a==="ok"?"verificado":"duplicado";logA("Cambio de estado",r.id,r.cedula+" → "+r.estado);toast("Registro actualizado");vAdmin()});
+ $$("[data-a]").forEach(b=>b.onclick=()=>{const r=db.records.find(x=>x.id===b.dataset.id);r.estado=b.dataset.a==="ok"?"verificado":b.dataset.a==="rev"?"revision":"duplicado";logA("Cambio de estado",r.id,r.cedula+" → "+r.estado);toast("Registro actualizado");vAdmin()});
  $("#btnPdf").onclick=exportPdf;$("#btnCsv").onclick=()=>{const csv=["usuario,accion,registro,detalles,resultado,fecha"].concat(A.map(x=>[x.u,x.a,x.reg,x.det,x.ok?"Exito":"Fallo",new Date(x.t).toISOString()].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(","))).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="firmabal-auditoria.csv";a.click()}}
 function exportCsv(){const h=["nombre","cedula","nac","sexo","lugar","whatsapp","municipio","distrito","sector","circ","estado"];
  const csv=[h.join(",")].concat(db.records.map(r=>h.map(k=>`"${String(r[k]??"").replace(/"/g,'""')}"`).join(","))).join("\n");
@@ -470,8 +519,8 @@ const NAMES=["Configurar","Cédula","Revisar datos","Firmar"];
 function head(s){return `<div class="steps">${[1,2,3,4].map(i=>`<i class="${i<=s?"on":""}"></i>`).join("")}</div><p class="sub" style="font-size:17px;margin:-6px 0 18px">Paso ${s} de 4 · ${NAMES[s-1]}</p>`}
 function renderWiz(){const s=wiz.step,bar=head(s);
  if(s===1)view.innerHTML=`<div class="pad view-pad" style="padding-top:18px">${bar}
-  <div class="card" style="margin-top:0"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#10131A" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></div><div class="sheet-title"><h2 style="font-size:19px">Cómo realizar la captura</h2><p>Pasos para un registro correcto</p></div></div>
-  <ol style="font-size:18px;line-height:1.55;color:#3A3F4A;padding-left:24px;margin:16px 0 4px"><li>Pida el número de WhatsApp del ciudadano.</li><li>Capture el frente y luego el reverso de la cédula, con buena iluminación.</li><li>Revise los datos extraídos automáticamente. Los campos verificados quedan bloqueados.</li><li>El ciudadano firma en pantalla y se guarda el registro.</li></ol></div>
+  <div class="card" style="margin-top:0"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#10131A" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></div><div class="sheet-title"><h2 style="font-size:17px">Cómo realizar la captura</h2><p style="font-size:13.5px">Pasos para un registro correcto</p></div></div>
+  <ol style="font-size:16px;line-height:1.5;color:#3A3F4A;padding-left:22px;margin:14px 0 4px"><li>Pida el número de WhatsApp del ciudadano.</li><li>Capture el frente y luego el reverso de la cédula, con buena iluminación.</li><li>Revise los datos extraídos automáticamente. Los campos verificados quedan bloqueados.</li><li>El ciudadano firma en pantalla y se guarda el registro.</li></ol></div>
   <div class="card"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5">${WAI(26,"#25D366")}</div><div class="sheet-title"><h2 style="font-size:16.5px">WhatsApp y circunscripción</h2><p style="font-size:13.5px">Contacto del ciudadano y su circunscripción electoral</p></div></div>
   <div class="two-col"><input type="tel" id="fWa" inputmode="tel" placeholder="809-000-0000" value="${esc(wiz.d.whatsapp)}" style="font-size:18px;padding:16px;border-radius:18px;min-width:0"><input type="text" id="fCirc1" inputmode="numeric" maxlength="2" placeholder="Opcional" value="${esc(wiz.d.circ||"")}" style="font-size:18px;padding:16px;border-radius:18px;min-width:0"></div></div>
   <button class="btn btn-dark" id="next" style="padding:22px;font-size:20px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:12px">${ico("captura",24,1.8,"#fff")} Iniciar captura</button></div>`;
@@ -507,7 +556,7 @@ function consentSheet(onOk){dyn(`<div class="dmask sheet-mask" style="z-index:60
 function bindWiz(){const s=wiz.step,next=$("#next");
  if(s===1)next.onclick=()=>{const wa=$("#fWa").value.replace(/\D/g,"");if(wa.length<10)return toast("WhatsApp obligatorio (10 dígitos)");wiz.d.whatsapp=wa;const ci=$("#fCirc1")?$("#fCirc1").value.replace(/\D/g,""):"";if(ci)wiz.d.circ=ci;consentSheet(()=>{wiz.step=2;renderWiz()})};
  if(s===2){const rd=f=>new Promise(r=>{const x=new FileReader();x.onload=()=>{const im=new Image();im.onload=()=>{const m=900,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.72))};im.onerror=()=>r(x.result);im.src=x.result};x.readAsDataURL(f)});
-  $("#fFront").onchange=async e=>{if(e.target.files[0]){wiz.d.imgF=await rd(e.target.files[0]);renderWiz()}};$("#fBack").onchange=async e=>{if(e.target.files[0]){wiz.d.imgB=await rd(e.target.files[0]);renderWiz()}};
+  $("#fFront").onchange=async e=>{if(e.target.files[0]){wiz.d.imgF=await rd(e.target.files[0]);if(window.FAIdClean){toast("Limpiando fondo…");wiz.d.imgF=await FAIdClean.clean(wiz.d.imgF)}renderWiz()}};$("#fBack").onchange=async e=>{if(e.target.files[0]){wiz.d.imgB=await rd(e.target.files[0]);if(window.FAIdClean){toast("Limpiando fondo…");wiz.d.imgB=await FAIdClean.clean(wiz.d.imgB)}renderWiz()}};
   next.onclick=async()=>{if(!wiz.d.imgF)return toast("Capture primero el frente de la cédula");$("#ocrMsg").textContent="Leyendo cédula con OCR…";
    try{const imgs=[wiz.d.imgF,wiz.d.imgB].filter(Boolean);const txt=await puter.ai.chat("Extrae de esta cédula dominicana un JSON puro con llaves nombre, cedula, nac (AAAA-MM-DD), sexo (M/F), lugar, direccion, municipio, sector. La direccion suele estar en el reverso; si no aparece déjala vacía. Sin texto adicional.",...imgs);
     const j=JSON.parse(String(txt?.message?.content??txt).replace(/```json|```/g,"").trim());Object.assign(wiz.d,j,{lock:true});toast("Datos extraídos")}
@@ -527,6 +576,7 @@ function bindWiz(){const s=wiz.step,next=$("#next");
 
 if(new URLSearchParams(location.search).get("auto")){db.records.auto=true}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+if(window.__FA_SAAS_TAKEOVER)return;
 if(LOGN){const u=db.users.find(x=>x.id===LOGN);if(!u){
   document.body.innerHTML="<div style='min-height:100dvh;display:grid;place-items:center;font-family:sans-serif;color:#6B7280;text-align:center;padding:30px'><div><img src='icons/logo-badge-96.png' width='64' height='64' style='border-radius:18px'><p style='margin-top:14px'>Verificando su enlace…</p></div></div>";
   (window.FASync?FASync.pull(db,save):Promise.resolve(false)).then(()=>{if(db.users.find(x=>x.id===LOGN))location.reload();else document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>Enlace de acceso no válido.</p>"}).catch(()=>{document.body.innerHTML="<p style='padding:40px;font-family:sans-serif'>No se pudo verificar el enlace. Revise su conexión e intente de nuevo.</p>"});

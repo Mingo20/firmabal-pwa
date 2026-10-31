@@ -334,3 +334,54 @@ html,body{overscroll-behavior-y:auto}
 .sw i:before{content:"";position:absolute;width:23px;height:23px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.22s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .sw input:checked+i{background:#0B9D6B}
 .sw input:checked+i:before{transform:translateX(21px)}
+
+/* ===== v10 ===== */
+/* 1) modales por encima de TODO lo del mapa (marcadores, controles, burbujas) */
+.leaflet-container{z-index:0!important;isolation:isolate}
+.leaflet-pane,.leaflet-top,.leaflet-bottom,.leaflet-marker-pane,.leaflet-tooltip-pane,.leaflet-popup-pane{z-index:auto!important}
+.mapwrap,.covwrap,.homewrap{position:relative;z-index:0;isolation:isolate}
+.sheet-mask,.dmask{z-index:900!important}
+.sheet,.dsheet{z-index:910!important}
+.ib{z-index:950}
+
+/* 8) camara dentro de la barra, mas pequena, con protagonismo */
+@media(max-width:899px){
+ .tabbar{overflow:visible}
+ .tab-cam{width:58px;height:58px;border-radius:20px;margin-top:0;border:0;box-shadow:0 6px 16px rgba(16,19,26,.28)}
+ .tab-cam svg{width:28px;height:28px}
+ .tab[data-v="captura"] svg{width:28px;height:28px}
+}
+
+/* ===== Inicio tipo Monitor + mapa territorial ===== */
+.homewrap{background:#fff}
+.covhead{padding:14px 16px 6px;background:#fff}
+.covtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.covtit{display:flex;align-items:center;gap:9px}
+.covtit b{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:#10131A}
+.covback{border:0;background:none;color:#10131A;font-weight:700;font-size:13.5px;font-family:inherit;cursor:pointer;padding:6px 2px;text-decoration:underline;text-underline-offset:3px}
+.covtrail{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:8px 0 4px;font-size:14px;color:#6B7280}
+.covtrail em{font-style:normal;color:#B6BBC6}
+.cc{border:0;background:none;font-family:inherit;font-weight:700;font-size:14px;color:#6B7280;cursor:pointer;padding:2px 0}
+.cc.on{color:#10131A;cursor:default}
+.covwrap2{position:relative;height:calc(100vh - 360px);min-height:320px;overflow:hidden}
+.covwrap2 #covmap{height:100%;width:100%}
+.covnote{padding:10px 16px 12px;font-size:13px;color:#8A909C;background:#fff;border-bottom:1px solid var(--line)}
+.homewrap+.krow{padding:12px 16px 14px}
+@media(min-width:900px){.covwrap2{height:460px;border-radius:0 0 20px 20px}.homewrap{border-radius:20px;overflow:hidden;border:1px solid var(--line)}.homewrap+.krow{padding:14px 2px}}
+
+/* burbujas con halo (colores actuales de la app) */
+.cvb{position:relative;display:grid;place-items:center;transform:translate(-50%,-50%)}
+.cvb .cvh{position:absolute;border-radius:50%;background:var(--c);opacity:.22;pointer-events:none;left:50%;top:50%;transform:translate(-50%,-50%)}
+.cvb b{position:relative;min-width:34px;height:34px;padding:0 10px;border-radius:99px;background:var(--c);color:#fff;border:3px solid #fff;box-shadow:0 3px 10px rgba(16,19,26,.32);display:grid;place-items:center;font-size:14px;font-weight:700;cursor:pointer}
+.cvb .cvt{display:none;position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;color:#10131A;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;box-shadow:0 6px 18px rgba(16,19,26,.25);z-index:5}
+.cvb.tip .cvt,.cvb:hover .cvt{display:block}
+.covloc{width:42px;height:42px;border:0;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(16,19,26,.25);display:grid;place-items:center;cursor:pointer;margin:10px 10px 0 0}
+.leaflet-marker-icon.leaflet-div-icon{background:none;border:0}
+
+/* 8) la camara queda DENTRO de la barra, mas pequena y con protagonismo */
+@media(max-width:899px){
+ .tabbar{height:calc(70px + env(safe-area-inset-bottom));padding:6px 6px calc(env(safe-area-inset-bottom) + 6px);align-items:center;overflow:hidden}
+ .tab-cam{width:54px;height:54px;border-radius:18px;margin-top:0!important;border:0!important;box-shadow:0 4px 12px rgba(16,19,26,.30);flex:0 0 auto}
+ .tab-cam svg{width:26px!important;height:26px!important}
+ main#view{padding-bottom:92px}
+}
