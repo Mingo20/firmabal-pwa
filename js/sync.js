@@ -24,15 +24,35 @@ async function call(action,payload,ms){
 /* ---- traduccion app <-> nube ---- */
 const toCloudUser=u=>({uid:u.id,nombre:u.nombre,rol:u.rol,whatsapp:u.whatsapp||"",cedula:u.cedula||"",provincia:u.provincia||"",municipio:u.municipio||"",activo:u.activo!==false,nuevo:u.nuevo!==false,foto:u.foto||"",org:u.org||""});
 const fromCloudUser=c=>({id:c.uid,nombre:c.nombre,rol:c.rol,whatsapp:c.whatsapp||"",cedula:c.cedula||"",provincia:c.provincia||"",municipio:c.municipio||"",activo:c.activo!==false,nuevo:c.nuevo!==false,foto:c.foto||""});
-const toCloudRec=(r,recName)=>({rid:r.id,nombre:r.nombre,cedula:r.cedula,nac:r.nac||"",sexo:r.sexo||"",lugar:r.lugar||"",whatsapp:r.whatsapp||"",direccion:r.direccion||"",provincia:r.provincia||"",municipio:r.municipio||"",distrito:r.distrito||"",sector:r.sector||"",circ:String(r.circ||""),estado:r.estado||"pendiente",auto:!!r.auto,rec:String(r.rec||""),rec_nombre:recName||"",fecha:new Date(r.fecha||Date.now()).toISOString(),firma:r.firma||"",lat:r.lat==null?undefined:r.lat,lng:r.lng==null?undefined:r.lng});
-const fromCloudRec=c=>({id:c.rid,nombre:c.nombre,cedula:c.cedula,nac:c.nac||"",sexo:c.sexo||"",lugar:c.lugar||"",whatsapp:c.whatsapp||"",direccion:c.direccion||"",provincia:c.provincia||"",municipio:c.municipio||"",distrito:c.distrito||"",sector:c.sector||"",circ:c.circ||"",estado:c.estado||"pendiente",auto:!!c.auto,rec:c.rec||"",fecha:Date.parse(c.fecha)||Date.now(),firma:c.firma||"",lat:c.lat==null?undefined:c.lat,lng:c.lng==null?undefined:c.lng});
+const toCloudRec=(r,recName)=>({rid:r.id,nombre:r.nombre,cedula:r.cedula,nac:r.nac||"",sexo:r.sexo||"",lugar:r.lugar||"",whatsapp:r.whatsapp||"",direccion:r.direccion||"",provincia:r.provincia||"",municipio:r.municipio||"",distrito:r.distrito||"",sector:r.sector||"",circ:String(r.circ||""),estado:r.estado||"pendiente",auto:!!r.auto,rec:String(r.rec||""),rec_nombre:recName||"",fecha:new Date(r.fecha||Date.now()).toISOString(),firma:r.firma||"",imgFRONTAL:r.imgFRONTAL||"",imgTRASERA:r.imgTRASERA||"",lat:r.lat==null?undefined:r.lat,lng:r.lng==null?undefined:r.lng});
+const fromCloudRec=c=>({id:c.rid,nombre:c.nombre,cedula:c.cedula,nac:c.nac||"",sexo:c.sexo||"",lugar:c.lugar||"",whatsapp:c.whatsapp||"",direccion:c.direccion||"",provincia:c.provincia||"",municipio:c.municipio||"",distrito:c.distrito||"",sector:c.sector||"",circ:c.circ||"",estado:c.estado||"pendiente",auto:!!c.auto,rec:c.rec||"",fecha:Date.parse(c.fecha)||Date.now(),firma:c.firma||"",imgFRONTAL:c.imgFRONTAL||"",imgTRASERA:c.imgTRASERA||"",lat:c.lat==null?undefined:c.lat,lng:c.lng==null?undefined:c.lng});
+
+/* ---- imagenes pendientes: IndexedDB (localStorage solo aguanta ~5 MB) ---- */
+const IMGK=["firma","imgFRONTAL","imgTRASERA"];
+const idb=()=>new Promise((ok,ko)=>{const r=indexedDB.open("firmabal-imgs",1);r.onupgradeneeded=()=>r.result.createObjectStore("i");r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)});
+const idbPut=async(k,v)=>{const d=await idb();return new Promise((ok,ko)=>{const t=d.transaction("i","readwrite");t.objectStore("i").put(v,k);t.oncomplete=()=>ok();t.onerror=()=>ko(t.error)})};
+const idbGet=async k=>{const d=await idb();return new Promise((ok,ko)=>{const t=d.transaction("i").objectStore("i").get(k);t.onsuccess=()=>ok(t.result);t.onerror=()=>ko(t.error)})};
+const idbDel=async k=>{try{const d=await idb();d.transaction("i","readwrite").objectStore("i").delete(k)}catch(e){}};
 
 /* ---- cola de envio ---- */
-function enqueue(action,payload){const a=q();a.push({action,payload,t:Date.now()});sq(a);flush()}
+async function enqueue(action,payload){
+  if(action==="saveRecord"&&payload&&payload.record){
+    const r=payload.record;
+    for(const k of IMGK){const v=r[k];if(v&&String(v).startsWith("data:")){const id="img:"+r.rid+":"+k;try{await idbPut(id,v);r[k]="@idb:"+id}catch(e){/* sin IndexedDB: se queda inline */}}}
+  }
+  const a=q();
+  /* un saveRecord nuevo del mismo registro reemplaza al pendiente (no se acumulan copias pesadas) */
+  const out=(action==="saveRecord"&&payload&&payload.record)?a.filter(x=>!(x.action==="saveRecord"&&x.payload.record.rid===payload.record.rid)):a;
+  out.push({action,payload,t:Date.now()});sq(out);flush()}
 async function flush(){
   if(S.busy)return;const a=q();if(!a.length)return;S.busy=true;
   try{
-    while(a.length){const it=a[0];await call(it.action,it.payload,25000);a.shift();sq(a)}
+    while(a.length){const it=a[0];let p=it.payload;
+      if(it.action==="saveRecord"&&p&&p.record){p={...p,record:{...p.record}};
+        for(const k of IMGK){const v=p.record[k];if(v&&String(v).startsWith("@idb:")){const d=await idbGet(v.slice(5));if(d)p.record[k]=d;else delete p.record[k]}}}
+      await call(it.action,p,45000);
+      if(it.action==="saveRecord"&&it.payload.record){for(const k of IMGK){const v=it.payload.record[k];if(v&&String(v).startsWith("@idb:"))idbDel(v.slice(5))}}
+      a.shift();sq(a)}
   }catch(e){/* queda en cola */}finally{S.busy=false}
 }
 
@@ -72,7 +92,7 @@ const Sync={
     db.records=(db.records||[]).filter(r=>!gone.has(r.id));
     const map=new Map(db.records.map(r=>[r.id,r]));
     (j.records||[]).forEach(c=>{if(pend.has(c.rid))return;const n=fromCloudRec(c),o=map.get(n.id);
-      if(o){Object.assign(o,n,{imgFRONTAL:o.imgFRONTAL,imgTRASERA:o.imgTRASERA,firma:n.firma||o.firma})}else{db.records.push(n)}});
+      if(o){Object.assign(o,n,{imgFRONTAL:n.imgFRONTAL||o.imgFRONTAL,imgTRASERA:n.imgTRASERA||o.imgTRASERA,firma:n.firma||o.firma})}else{db.records.push(n)}});
     const um=new Map((db.users||[]).map(u=>[u.id,u]));
     (j.users||[]).forEach(c=>{const n=fromCloudUser(c),o=um.get(n.id);if(o)Object.assign(o,n);else db.users.push(n)});
     db.cloud={locs:j.locations||[],notifs:j.notifs||[],audit:j.audit||[],t:j.t};

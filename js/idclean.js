@@ -5,7 +5,7 @@
 (function(){
 "use strict";
 
-function loadImg(src){return new Promise((ok,ko)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=ko;im.src=src})}
+function loadImg(src){return new Promise((ok,ko)=>{const im=new Image();if(!/^data:/.test(src))im.crossOrigin="anonymous";im.onload=()=>ok(im);im.onerror=ko;im.src=src})}
 
 /* Analiza en baja resolucion: devuelve {x0,y0,x1,y1} de la tarjeta en coordenadas relativas 0..1, o null */
 function detect(im){

@@ -385,3 +385,63 @@ html,body{overscroll-behavior-y:auto}
  .tab-cam svg{width:26px!important;height:26px!important}
  main#view{padding-bottom:92px}
 }
+
+/* ===== v11 ===== */
+/* 1) migas flotantes dentro del mapa, esquina superior derecha */
+.covwrap2{position:relative}
+.covfloat{position:absolute;top:10px;right:10px;z-index:500;max-width:calc(100% - 70px);display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
+.covfloat .covtrail{pointer-events:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:2px 6px;margin:0;padding:7px 11px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 14px rgba(16,19,26,.14);font-size:13px;backdrop-filter:blur(6px)}
+.covfloat .cc{font-size:13px;padding:1px 0}
+.covfloat .covback{pointer-events:auto;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:12.5px;text-decoration:none;box-shadow:0 3px 10px rgba(16,19,26,.12)}
+.homewrap .covwrap2{height:calc(100vh - 330px)}
+/* KPI en blanco y margen simetrico: el mismo margen a ambos lados de la fila */
+.homewrap+.krow{padding:12px 16px 14px;scroll-padding:0 16px}
+.homewrap+.krow::after{content:"";flex:0 0 6px}  /* 6px + gap 10px = 16px = margen izquierdo */
+.homewrap+.krow .kcard{background:#fff!important;color:var(--ink)!important;border:1px solid var(--line)!important}
+.homewrap+.krow .kcard .kcard-l{color:#8A909C!important}
+.homewrap+.krow .kcard b{color:var(--ink)!important}
+.homewrap+.krow .kcard .ico{background:#F1F2F5!important}
+.homewrap+.krow .kcard .ico svg{stroke:#10131A!important}
+.fsbar{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
+.fsbar select,.fsbar input{margin-top:0!important;width:100%}
+@media(min-width:900px){.fsbar{grid-template-columns:1fr 220px 240px!important}}
+
+/* ===== Territorio: panel grafico ===== */
+.tpanel{display:block}
+.tsum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.tsum>div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 6px;text-align:center}
+.tsum small{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A909C}
+.tsum b{display:block;font-size:24px;margin-top:2px;color:var(--ink)}
+.tgrid2{display:grid;grid-template-columns:1fr;gap:14px}
+.tcard{margin:0!important;padding:20px 18px!important;min-width:0}
+.tcard .tt{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.tcard .tt b{font-size:17px;color:var(--ink)}
+.tdona .tleg{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin-top:12px;font-size:13.5px;color:#3A3F4A}
+.tdona .tleg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tdona .tleg b{margin-left:3px}
+.tseg{cursor:pointer;transition:opacity .15s}.tseg:hover{opacity:.85}
+.tbh{display:flex;flex-direction:column;gap:12px}
+.tbr{display:grid;grid-template-columns:minmax(80px,38%) 1fr 28px;align-items:center;gap:10px}
+.tbl{font-size:12.5px;text-transform:uppercase;color:#4B5160;text-align:right;line-height:1.2;overflow-wrap:anywhere}
+.tbt{height:26px;background:#F4F5F7;border-radius:9px;overflow:hidden}
+.tbf{height:100%;border-radius:9px;transition:width .6s ease}
+.tbr b{font-size:13px;color:var(--ink);text-align:right}
+.tbv{display:flex;gap:8px;height:210px}
+.tbv-y{display:flex;flex-direction:column;justify-content:space-between;font-size:12px;color:#8A909C;padding-bottom:20px;text-align:right}
+.tbv-g{flex:1;display:flex;align-items:flex-end;gap:5px;border-bottom:1px solid #EDEFF3;background:repeating-linear-gradient(to top,transparent 0,transparent calc(50% - 1px),#F1F2F5 calc(50% - 1px),#F1F2F5 50%)}
+.tbv-c{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;min-width:0}
+.tbv-b{width:78%;border-radius:8px 8px 0 0;min-height:2px;transition:height .6s ease}
+.tbv-c em{position:absolute;bottom:-20px;font-style:normal;font-size:10.5px;color:#8A909C;white-space:nowrap}
+.tprog{display:flex;justify-content:space-around;flex-wrap:wrap;gap:14px;text-align:center}
+.tring{display:flex;flex-direction:column;align-items:center;gap:6px;max-width:140px}
+.tring span{font-size:12.5px;color:#6B7280;line-height:1.3}
+.ttip{position:fixed;z-index:3000;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:14px;box-shadow:0 8px 24px rgba(16,19,26,.2);pointer-events:none;max-width:200px}
+@media(min-width:900px){.tgrid2{grid-template-columns:1fr 1fr}.tsum b{font-size:28px}}
+
+.rcbar{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
+.rcbar select,.rcbar input{margin-top:0!important;width:100%}
+@media(min-width:900px){.rcbar{grid-template-columns:1fr 220px 200px!important}}
+
+/* boton de captura guiada dentro de las tarjetas de cedula */
+.camgo{margin-top:10px;padding:13px 20px;border-radius:16px;border:0;background:var(--ink);color:#fff;font-family:inherit;font-size:15.5px;font-weight:600;cursor:pointer;width:100%;max-width:320px}
+.camgo:active{transform:scale(.98)}
