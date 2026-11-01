@@ -46,7 +46,7 @@ dash:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
 reg:'<path d="M7 3.5h7.2L19 8.300V19a1.500 1.500 0 0 1-1.500 1.500H7A1.500 1.500 0 0 1 5.500 19V5A1.500 1.500 0 0 1 7 3.500z"/><path d="M14 3.800V8.500h4.700"/><path d="M8.800 12.500h6.400M8.800 16h4"/>',
 captura:'<path d="M4 8.500h2.800l1.400-2.300h7.600l1.400 2.300H20a.9.900 0 0 1 .9.900v8.600a.9.900 0 0 1-.9.900H4a.9.900 0 0 1-.9-.9V9.400A.9.900 0 0 1 4 8.500z"/><circle cx="12" cy="13.600" r="3.300"/>',
 monitor:'<circle cx="12" cy="12" r="2.200"/><path d="M7.300 7.300a6.600 6.600 0 0 0 0 9.400M16.700 7.300a6.600 6.600 0 0 1 0 9.400M4.500 4.500a10.500 10.500 0 0 0 0 15M19.500 4.500a10.500 10.500 0 0 1 0 15"/>',
-terr:'<path d="M9 4.500L3.500 6.800v12.700L9 17.200l6 2.300 5.500-2.300V4.500L15 6.800z"/><path d="M9 4.500v12.700M15 6.800v12.700"/>',
+chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',terr:'<path d="M9 4.500L3.500 6.800v12.700L9 17.200l6 2.300 5.500-2.300V4.500L15 6.800z"/><path d="M9 4.500v12.700M15 6.800v12.700"/>',
 recol:'<circle cx="9.500" cy="8" r="3.300"/><path d="M3.500 19.500c.4-3.300 2.700-5.300 6-5.300s5.600 2 6 5.300"/><path d="M16.300 5.200a3.100 3.100 0 0 1 0 5.700M18.500 14.600c1.500.7 2.500 2.200 2.800 4.400"/>',
 firmas:'<path d="M4 20.200h4.300L19.300 9.200a2.200 2.200 0 0 0 0-3.100l-1.400-1.400a2.200 2.200 0 0 0-3.100 0L3.800 15.700z"/><path d="M13.200 6.400l4.400 4.400"/><path d="M12 20.200h8.500"/>',
 audit:'<path d="M12 3.200l7 2.700v5.600c0 4.300-2.900 7.700-7 9.300-4.100-1.600-7-5-7-9.300V5.900z"/><path d="M8.800 12.100l2.200 2.200 4.200-4.400"/>',
@@ -57,7 +57,7 @@ const XI='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1
 const isPC=()=>matchMedia("(min-width:900px)").matches;
 const AUTO=new URLSearchParams(location.search).get("auto")==="1";
 const REC=new URLSearchParams(location.search).get("rec")||"REC-001";
-const MENU=[["dash", "Inicio"], ["reg", "Registros"], ["captura", "Captura"], ["monitor", "Monitor"], ["terr", "Territorios"], ["recol", "Recolectores"], ["firmas", "Firmas"], ["audit", "Auditor\u00eda"], ["export", "Exportaci\u00f3n"], ["config", "Configuraci\u00f3n"]];
+const MENU=[["dash", "Inicio"], ["reg", "Registros"], ["captura", "Captura"], ["monitor", "Monitor"], ["terr", "Analítica"], ["recol", "Recolectores"], ["firmas", "Firmas"], ["audit", "Auditor\u00eda"], ["export", "Exportaci\u00f3n"], ["config", "Configuraci\u00f3n"]];
 const isToday=ts=>new Date(ts).toDateString()===new Date().toDateString();
 const stats=()=>({total:db.records.length,hoy:db.records.filter(r=>isToday(r.fecha)).length,pen:db.records.filter(r=>r.estado==="pendiente").length,dup:db.records.filter(r=>r.estado==="duplicado").length,auto:db.records.filter(r=>r.auto).length});
 const recBase=r=>{const id=String(r.rec||"");const u=db.users.find(x=>x.id===id||x.id===id.replace("REC-","U-"))||(id==="REC-001"?db.users.find(x=>x.id==="U-1"):null);return u?u.nombre:((db.cloud&&r.rec_nombre)||r.rec_nombre||"")};
@@ -89,7 +89,7 @@ reg:{t:"Registros",d:"Todas las afiliaciones capturadas.",p:["Escriba en el busc
 captura:{t:"Captura",d:"Flujo guiado de 4 pasos para registrar un afiliado.",p:["Paso 1: pida el WhatsApp del ciudadano y, si lo desea, su circunscripción y presente la hoja de protección de datos.","Paso 2: fotografíe frente y reverso de la cédula con buena luz.","Paso 3: revise los datos leídos.","Paso 4: el ciudadano firma con el dedo y se guarda el registro."]},
 firmas:{t:"Firmas",d:"Galería de firmas con su expediente.",p:["Toque una tarjeta para ver la firma, la cédula frontal y trasera y los datos electorales.","Descargar PDF genera un expediente ordenado, válido como evidencia."]},
 monitor:{t:"Monitor",d:"Mapa del territorio y estado del equipo.",p:["Los puntos del mapa son los registros capturados (verde validado, ámbar pendiente).","Deslice las tarjetas para ver recolectores activos y registros.","El botón circular inferior comparte su ubicación en vivo; se anima mientras está activo. Tóquelo de nuevo para detenerlo."]},
-terr:{t:"Territorios",d:"Registros agrupados por municipio, sector y circunscripción.",p:["Cada tarjeta indica la zona y cuántos afiliados tiene.","Úselo para detectar zonas con poca cobertura."]},
+terr:{t:"Analítica",d:"Resumen, distribución y progreso de los registros.",p:["Cada tarjeta indica la zona y cuántos afiliados tiene.","Úselo para detectar zonas con poca cobertura."]},
 recol:{t:"Recolectores",d:"Equipo de captura y su rendimiento.",p:["Toque un reclutador para ver su rendimiento, cambiar su rol y estado, copiar su enlace único y escribirle por WhatsApp.","El botón + inferior agrega un nuevo reclutador."]},
 audit:{t:"Auditoría",d:"Bitácora de eventos y revisión de firmas.",p:["La tabla registra quién hizo qué, sobre qué registro, el resultado y la fecha. Deslice horizontalmente para ver todas las columnas.","En Revisión de firmas valide con el botón del check o marque duplicado con el botón de copias.","Exporte los expedientes en PDF o la bitácora en CSV."]},
 export:{t:"Exportación",d:"Descarga de expedientes y datos.",p:["PDF de todos los expedientes: un documento ordenado por afiliado.","CSV de registros: datos en hoja de cálculo."]},
@@ -142,13 +142,13 @@ window.addEventListener("appinstalled",()=>ibHide(true));
 if(document.readyState!=="loading")setTimeout(ibShow,1200);else window.addEventListener("load",()=>setTimeout(ibShow,1200));
 
 /* ---- Navegación ---- */
-const TABS=[["dash","Inicio"],["reg","Registros"],["captura","Captura"],["firmas","Firmas"],["menu","Menú"]];
+const TABS=[["dash","Inicio"],["firmas","Firmas"],["captura","Captura"],["reg","Registros"],["menu","Menú"]];
 $("#tabbar").innerHTML=TABS.map(([k,l])=>k==="captura"?`<button class="tab tab-cam" data-v="captura" aria-label="${l}">${ico("captura",30,1.9,"#fff")}</button>`:k==="menu"?`<button class="tab" data-v="menu" aria-label="${l}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.700" y="3.700" width="6.600" height="6.600" rx="2"/><rect x="13.700" y="3.700" width="6.600" height="6.600" rx="2"/><rect x="3.700" y="13.700" width="6.600" height="6.600" rx="2"/><rect x="13.700" y="13.700" width="6.600" height="6.600" rx="2"/></svg></button>`:`<button class="tab" data-v="${k}" aria-label="${l}">${ico(k,26)}</button>`).join("");
-$("#sideLinks").innerHTML=MENU.filter(m=>can(m[0])).map(([k,l])=>`<button class="sb-link" data-v="${k}" title="${l}">${ico(k,22)}<span class="sb-name">${l}</span></button>`).join("");
+$("#sideLinks").innerHTML=MENU.filter(m=>can(m[0])).map(([k,l])=>`<button class="sb-link" data-v="${k}" title="${l}">${ico(k==="terr"?"chart":k,22)}<span class="sb-name">${l}</span></button>`).join("");
 const sbKey="firmabal-sb";let sbOpen=localStorage.getItem(sbKey)!=="0";
 const applySb=()=>{document.body.classList.toggle("sb-collapsed",!sbOpen);$("#btnSideToggle").innerHTML=`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${sbOpen?"M15 6l-6 6 6 6":"M9 6l6 6-6 6"}"/></svg>`;$("#btnSideToggle").title=sbOpen?"Contraer":"Desplegar"};
 $("#btnSideToggle").onclick=()=>{sbOpen=!sbOpen;localStorage.setItem(sbKey,sbOpen?"1":"0");applySb()};applySb();
-const menuSheet=show=>{if(!show)return closeS($("#menuSheet"));{$("#menuGrid").innerHTML=MENU.filter(m=>can(m[0])).map(([k,l])=>`<button data-go="${k}" class="${cur===k?"on":""}">${ico(k,30,1.6,"#2B2F38")}${l}</button>`).join("");$$("[data-go]").forEach(b=>b.onclick=()=>{closeS($("#menuSheet"),()=>go(b.dataset.go))});openS($("#menuSheet"))}};
+const menuSheet=show=>{if(!show)return closeS($("#menuSheet"));{$("#menuGrid").innerHTML=MENU.filter(m=>can(m[0])).map(([k,l])=>`<button data-go="${k}" class="${cur===k?"on":""}">${ico(k==="terr"?"chart":k,30,1.6,"#2B2F38")}${l}</button>`).join("");$$("[data-go]").forEach(b=>b.onclick=()=>{closeS($("#menuSheet"),()=>go(b.dataset.go))});openS($("#menuSheet"))}};
 $("#btnShare").onclick=()=>sheet(true);
 let navBusy=false;
 $("#btnCloseMenu").onclick=()=>menuSheet(false);$("#btnCloseMenu").innerHTML=XI;
@@ -198,7 +198,7 @@ function vCov(){const w=document.getElementById("covmap");if(!w)return;
   bar.innerHTML=`<div class="covtrail">${crumbs.map((c,i)=>(i?'<em>›</em>':"")+c).join("")}</div>${covLv.p?'<button class="covback" data-lv="back">‹ Volver</button>':""}`;
   $$("[data-lv]",bar).forEach(b=>b.onclick=()=>{const k=b.dataset.lv;if(k==="back")return back();
     if(k==="n"){covLv={p:null,m:null,d:null};fly(NAC,7.3)}else if(k==="p"){covLv.m=null;covLv.d=null;const g=GEO[covLv.p];fly([g[0],g[1]],10)}else if(k==="m"){covLv.d=null;const g=GEO[covLv.p];fly(g[2][covLv.m]||[g[0],g[1]],12.5)}draw()});
-  const leyenda={provincia:"Provincia con miembros registrados. Toca una burbuja para profundizar.",municipio:"Municipio con miembros registrados. Toca una burbuja para profundizar.",distrito:"Distrito municipal con miembros registrados. Toca una burbuja para profundizar.",sector:"Sector con miembros registrados."};
+  const leyenda={provincia:"Provincia. Toca una burbuja para profundizar.",municipio:"Municipio. Toca una burbuja para profundizar.",distrito:"Distrito municipal. Toca una burbuja para profundizar.",sector:"Sector. Toca una burbuja para profundizar."};
   note.textContent=leyenda[nv]+(sinUbic&&!covLv.p?` (${sinUbic} sin ubicar)`:"");
   if(!covLv.p){const max=Math.max(1,...Object.values(P).map(x=>x.n));
     Object.entries(P).forEach(([p,d])=>{const g=GEO[p];bub(centroDe(d,[g[0],g[1]]),d.n,p,max,()=>{covLv.p=p;fly(centroDe(d,[g[0],g[1]]),10);draw()})});
@@ -246,6 +246,7 @@ function vEquipo(){const s=stats();const live=!!db.collector.sharing;
  <button class="fab ${live?"live":""}" id="shareLoc" title="${live?"Dejar de compartir ubicación":"Compartir mi ubicación en vivo"}" aria-label="Ubicación en vivo"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.500-5.700-6.500-10.800a6.500 6.500 0 0 1 13 0C18.500 15.300 12 21 12 21z"/><circle cx="12" cy="10.200" r="2.400"/></svg></button>`;
  map=L.map("map",{zoomControl:true}).setView([18.4861,-69.9312],11);
  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(map);
+ try{const mw=document.getElementById("map");if(mw&&!mw.querySelector(".mapfoot")){const f=document.createElement("div");f.className="mapfoot";f.innerHTML="<span>© OpenStreetMap</span>";mw.appendChild(f)}}catch(e){}
  db.records.filter(r=>r.lat).forEach(r=>L.circleMarker([r.lat,r.lng],{radius:9,color:"#10131A",fillColor:r.estado==="verificado"?"#0B9D6B":"#E8A317",fillOpacity:.9}).addTo(map).bindPopup(`<b>${esc(r.nombre)}</b><br>${esc(r.sector)} · Circ. ${esc(r.circ)}`));
  if(live&&db.collector.pos){const u=me();const img=u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`<span style="font-size:20px;font-weight:600;color:#fff">${esc((u.nombre||"?")[0].toUpperCase())}</span>`;
  L.marker(db.collector.pos,{icon:L.divIcon({className:"",iconSize:[52,52],iconAnchor:[26,26],html:`<div class="pinme">${img}</div>`})}).addTo(map).bindPopup("<b>Ubicación en vivo compartida</b>")}
@@ -263,8 +264,10 @@ function vFirmas(){
  const recs=db.users.filter(u=>u.rol==="recolector"||u.rol==="administrador"||u.rol==="supervisor");
  view.innerHTML=`<div class="pad"><div class="card" style="margin-top:0;padding:16px"><div class="filters fsbar">
   <div style="position:relative"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#8A909C">${SRCH}</span><input type="text" id="fsq" placeholder="Buscar firma" value="${esc(fsQ)}" style="padding-left:50px;font-size:17px;border-radius:16px;height:56px"></div>
-  ${esRec?"":`<select id="fsr" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Reclutador</option>${recs.map(u=>`<option value="${u.id}">REC- ${esc(u.nombre)}</option>`).join("")}</select>`}
-  <input type="text" id="fsc" inputmode="numeric" placeholder="Cédula de identidad" value="${esc(fsC)}" style="font-size:17px;border-radius:16px;height:56px"></div></div>
+  <div class="fsrow">
+   <input type="text" id="fsc" inputmode="numeric" placeholder="Cédula" value="${esc(fsC)}" style="font-size:17px;border-radius:16px;height:56px">
+   ${esRec?"":`<select id="fsr" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Reclutador</option>${recs.map(u=>`<option value="${u.id}">REC- ${esc(u.nombre)}</option>`).join("")}</select>`}
+  </div></div></div>
   <div class="firmas" id="fsl" style="margin-top:16px"></div></div>`;
  if($("#fsr"))$("#fsr").value=fsR;
  const draw=()=>{fsQ=$("#fsq").value;fsR=$("#fsr")?$("#fsr").value:"";fsC=$("#fsc").value;
@@ -295,6 +298,29 @@ const _imgCache={};
 async function urlToData(u){if(!u||String(u).startsWith("data:"))return u;if(_imgCache[u])return _imgCache[u];
  try{const r=await fetch(u,{mode:"cors"});if(!r.ok)return u;const b=await r.blob();return _imgCache[u]=await new Promise(ok=>{const f=new FileReader();f.onload=()=>ok(f.result);f.onerror=()=>ok(u);f.readAsDataURL(b)})}catch(e){return u}}
 async function prepImgs(r){const o=Object.assign({},r);for(const k of ["firma","imgFRONTAL","imgTRASERA"])if(o[k])o[k]=await urlToData(o[k]);return o}
+/* Confirmacion estetica (reemplaza el confirm generico del navegador) */
+function askConfirm(opts){
+ return new Promise(res=>{
+  const o=Object.assign({title:"Confirmar",text:"",ok:"Confirmar",cancel:"Cancelar",danger:true},opts||{});
+  const wrap=document.createElement("div");wrap.className="dmask sheet-mask";
+  wrap.innerHTML=`<section class="dsheet sheet cfm">
+   <div class="cfm-ico ${o.danger?"red":"ok"}">
+    ${o.danger?'<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.6 17.4A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.6L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>':'<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'}
+   </div>
+   <h2 class="cfm-t">${esc(o.title)}</h2>
+   <p class="cfm-x">${esc(o.text)}</p>
+   ${o.name?`<div class="cfm-n">${esc(o.name)}</div>`:""}
+   <div class="cfm-b">
+    <button class="btn btn-light" data-no style="margin:0">${esc(o.cancel)}</button>
+    <button class="btn ${o.danger?"btn-red":"btn-dark"}" data-yes style="margin:0">${esc(o.ok)}</button>
+   </div></section>`;
+  document.body.appendChild(wrap);requestAnimationFrame(()=>wrap.classList.add("show"));
+  const finish=v=>{wrap.classList.remove("show");setTimeout(()=>{wrap.remove();res(v)},220)};
+  wrap.querySelector("[data-no]").onclick=()=>finish(false);
+  wrap.querySelector("[data-yes]").onclick=()=>finish(true);
+  wrap.addEventListener("click",e=>{if(e.target===wrap)finish(false)});
+ });
+}
 function pdfExpediente(r){if(!window.jspdf)return toast("Cargando exportador, intente de nuevo");const {jsPDF}=window.jspdf;const d=new jsPDF({unit:"mm",format:"a4"});const W=210,M=14;
  d.setFillColor(16,19,26);d.rect(0,0,W,26,"F");d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(17);d.text(db.org||"FirmAbal",M,12);d.setFont("helvetica","normal");d.setFontSize(9);d.text("Expediente de afiliación · Evidencia de registro",M,19);
  d.setFontSize(8);d.text("Generado: "+new Date().toLocaleString("es-DO"),W-M,19,{align:"right"});
@@ -302,7 +328,7 @@ function pdfExpediente(r){if(!window.jspdf)return toast("Cargando exportador, in
  const sec=(t,y)=>{d.setFillColor(241,242,245);d.rect(M,y,W-2*M,7,"F");d.setTextColor(16,19,26);d.setFont("helvetica","bold");d.setFontSize(9);d.text(t,M+3,y+5);return y+10};
  const rows=(arr,y)=>{arr.forEach((p,i)=>{d.setFont("helvetica","normal");d.setFontSize(9);d.setTextColor(120);d.text(p[0],M+3,y);d.setTextColor(16,19,26);d.setFont("helvetica","bold");d.text(String(p[1]||"—"),M+55,y);y+=6.2});return y+2};
  let y=sec("DATOS DEL FIRMANTE",50);y=rows([["Nombre completo",r.nombre],["Cédula",r.cedula],["Fecha de nacimiento",r.nac],["Sexo",r.sexo],["Lugar de nacimiento",r.lugar],["WhatsApp",r.whatsapp],["Dirección",r.direccion]],y);
- y=sec("DATOS ELECTORALES",y+1);y=rows([["Municipio",r.municipio],["Distrito municipal",r.distrito],["Sector",r.sector],["Circunscripción",r.circ],["Estado del registro",r.estado],["Recolector responsable",r.rec],["Fecha y hora",new Date(r.fecha).toLocaleString("es-DO")]],y);
+ y=sec("DATOS ELECTORALES",y+1);y=rows([["Municipio",r.municipio],...(r.distrito?[["Distrito municipal",r.distrito]]:[]),["Sector",r.sector],["Circunscripción",r.circ],["Estado del registro",r.estado],["Recolector responsable",r.rec],["Fecha y hora",new Date(r.fecha).toLocaleString("es-DO")]],y);
  y=sec("FIRMA MANUSCRITA",y+1);d.setDrawColor(210);d.setFillColor(255,255,255);d.rect(M,y,W-2*M,34,"FD");
  if(r.firma)try{d.addImage(r.firma,"PNG",M+30,y+2,W-2*M-60,30)}catch{} y+=38;
  y=sec("DOCUMENTO DE IDENTIDAD",y);const bw=(W-2*M-6)/2,bh=44;
@@ -388,8 +414,10 @@ function vRecol(){
  const provs=[...new Set(db.users.map(u=>u.provincia).filter(Boolean))].sort();
  view.innerHTML=`<div class="pad"><div class="card" style="margin-top:0;padding:16px"><div class="filters rcbar">
   <div style="position:relative"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#8A909C">${SRCH}</span><input type="text" id="rcq" placeholder="Buscar recolector" value="${esc(rcQ)}" style="padding-left:50px;font-size:17px;border-radius:16px;height:56px"></div>
-  <select id="rcp" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Provincia</option>${provs.map(p=>`<option>${esc(p)}</option>`).join("")}</select>
-  <select id="rce" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Estado</option><option value="1">Activo</option><option value="0">Inactivo</option></select></div></div>
+  <div class="rcrow">
+   <select id="rcp" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Provincia</option>${provs.map(p=>`<option>${esc(p)}</option>`).join("")}</select>
+   <select id="rce" style="height:56px;font-size:17px;border-radius:16px;color:#6B7280"><option value="">Estado</option><option value="1">Activo</option><option value="0">Inactivo</option></select>
+  </div></div></div>
   <div class="agrid" id="rcl" style="margin-top:16px"></div></div>
  <button class="fab" id="fabAdd" aria-label="Agregar recolector"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>`;
  $("#rcp").value=rcP;$("#rce").value=rcE;
@@ -517,7 +545,7 @@ function ficha(id){const r=db.records.find(x=>x.id===id);
    document.addEventListener("click",outside,true);
    const mo=new MutationObserver(()=>{if(!document.body.contains(w)){gone();mo.disconnect()}});mo.observe(document.body,{childList:true,subtree:true})}
   const oc=dm?dm.querySelector("#optCirc"):null;if(oc)oc.onclick=()=>{dm.hidden=true;const e=$("#edCirc",w);if(e)e.click();else toast("No se puede editar este registro")};
-  const del=dm?dm.querySelector("#delReg"):null;if(del)del.onclick=()=>{gone();if(!confirm("¿Desea eliminar el registro de "+r.nombre+"?\n\nSe quitará también su firma. Esta acción no se puede deshacer."))return;
+  const del=dm?dm.querySelector("#delReg"):null;if(del)del.onclick=async()=>{gone();const okDel=await askConfirm({title:"Eliminar registro",text:"Se quitará también su firma. Esta acción no se puede deshacer.",name:r.nombre,ok:"Eliminar",cancel:"Cancelar"});if(!okDel)return;
    db.__skipDel=db.__skipDel||{};db.__skipDel[r.id]=true;
    db.records=db.records.filter(x=>x.id!==r.id);
    try{window.FASync&&FASync.deleteRecord(r.id)}catch(e){}
@@ -537,8 +565,8 @@ function vAdmin(){const A=db.audit;const ok=A.filter(x=>x.ok).length;
  <div class="card"><b style="font-size:18px">Revisión de firmas</b><p class="sub" style="font-size:15px;margin:6px 0 0">Valide o márquelo como duplicado</p><div class="revgrid">
  ${db.records.slice(-3).reverse().map(r=>`<div class="item" style="margin-top:10px"><div style="min-width:0"><b style="font-size:15px">${esc(r.nombre)}</b><small>${esc(r.cedula)} · ${r.estado==="revision"?"en revisión":r.estado}</small></div><div style="display:flex;gap:6px"><button class="btn btn-light sm" data-a="del" data-id="${r.id}" aria-label="Eliminar registro" title="Eliminar registro" style="color:#B3261E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button><button class="btn btn-light sm" data-a="ok" data-id="${r.id}" aria-label="Validar" title="Validar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></button><button class="btn btn-light sm" data-a="dup" data-id="${r.id}" aria-label="Marcar duplicado" title="Marcar duplicado"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.500" y="8.500" width="11" height="11" rx="2.500"/><path d="M15.500 8.500V6.500a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></div></div>`).join("")}</div>
 </div> <div class="two" style="margin-top:14px"><button class="btn btn-dark" id="btnPdf">Exportar expedientes</button><button class="btn btn-light" id="btnCsv" style="border:1px solid #E1E4EA">Exportar bitácora CSV</button></div></div>`;
- $$("[data-a]").forEach(b=>b.onclick=()=>{const r=db.records.find(x=>x.id===b.dataset.id);if(!r)return;
-  if(b.dataset.a==="del"){if(!confirm("¿Desea eliminar el registro de "+r.nombre+"?\n\nSe quitará también su firma. Esta acción no se puede deshacer."))return;
+ $$("[data-a]").forEach(b=>b.onclick=async()=>{const r=db.records.find(x=>x.id===b.dataset.id);if(!r)return;
+  if(b.dataset.a==="del"){if(!(await askConfirm({title:"Eliminar registro",text:"Se quitará también su firma. Esta acción no se puede deshacer.",name:r.nombre,ok:"Eliminar",cancel:"Cancelar"})))return;
    db.__skipDel=db.__skipDel||{};db.__skipDel[r.id]=true;db.records=db.records.filter(x=>x.id!==r.id);
    try{window.FASync&&FASync.deleteRecord(r.id)}catch(e){}logA("Eliminación de registro",r.id,r.nombre+" · "+r.cedula);save();toast("Registro eliminado");return vAdmin()}
   r.estado=b.dataset.a==="ok"?"verificado":b.dataset.a==="rev"?"revision":"duplicado";logA("Cambio de estado",r.id,r.cedula+" → "+r.estado);toast("Registro actualizado");vAdmin()});
@@ -630,7 +658,7 @@ function renderWiz(){const s=wiz.step,bar=head(s);
   <ol style="font-size:16px;line-height:1.5;color:#3A3F4A;padding-left:22px;margin:14px 0 4px"><li>Pida el número de WhatsApp del ciudadano.</li><li>Capture el frente y luego el reverso de la cédula, con buena iluminación.</li><li>Revise los datos extraídos automáticamente.</li><li>El ciudadano firma en pantalla y se guarda el registro.</li></ol></div>
   <div class="card"><div class="sheet-head"><div class="sheet-ico" style="background:#F1F2F5">${WAI(26,"#25D366")}</div><div class="sheet-title"><h2 style="font-size:16.5px">WhatsApp y circunscripción</h2><p style="font-size:13.5px">Contacto del ciudadano</p></div></div>
   <div class="two-col"><input type="tel" id="fWa" inputmode="tel" placeholder="809-000-0000" value="${esc(wiz.d.whatsapp)}" style="font-size:18px;padding:16px;border-radius:18px;min-width:0"><input type="text" id="fCirc1" inputmode="numeric" maxlength="2" placeholder="Opcional" value="${esc(wiz.d.circ||"")}" style="font-size:18px;padding:16px;border-radius:18px;min-width:0"></div></div>
-  <button class="btn btn-dark" id="next" style="padding:22px;font-size:20px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:12px">${ico("captura",24,1.8,"#fff")} Iniciar captura</button></div>`;
+  <button class="btn btn-dark" id="next" style="padding:15px;font-size:18px;border-radius:20px;display:flex;align-items:center;justify-content:center;gap:10px">${ico("captura",24,1.8,"#fff")} Iniciar captura</button></div>`;
  if(s===2)view.innerHTML=`<div class="pad">${bar}<h1>Cédula</h1><p class="sub">Fotografíe el frente y luego el reverso</p>
   <label class="cedula" id="fr" style="display:flex;flex-direction:column;align-items:center;gap:8px">${CAMI} Frente de la cédula${wiz.d.imgF?`<br><img src="${wiz.d.imgF}">`:""}<button type="button" class="camgo" id="goFront">Tomar foto con guía</button><input type="file" accept="image/*" capture="environment" hidden id="fFront"></label>
   <label class="cedula" id="bk" style="display:flex;flex-direction:column;align-items:center;gap:8px">${CAMI} Reverso de la cédula${wiz.d.imgB?`<br><img src="${wiz.d.imgB}">`:""}<button type="button" class="camgo" id="goBack">Tomar foto con guía</button><input type="file" accept="image/*" capture="environment" hidden id="fBack"></label>
@@ -640,10 +668,9 @@ function renderWiz(){const s=wiz.step,bar=head(s);
   <label>Cédula</label><input type="text" id="fCed" value="${esc(wiz.d.cedula)}" inputmode="numeric" ${wiz.d.lock&&wiz.d.cedula?"readonly":""}>
   <label>Fecha de nacimiento</label><input type="text" id="fNac" placeholder="AAAA-MM-DD" value="${esc(wiz.d.nac)}" ${wiz.d.lock&&wiz.d.nac?"readonly":""}>
   <label>Sexo</label><select id="fSexo"><option value="">Seleccione</option><option ${wiz.d.sexo==="M"?"selected":""}>M</option><option ${wiz.d.sexo==="F"?"selected":""}>F</option></select>
-  <label>Lugar de nacimiento</label><input type="text" id="fLugar" value="${esc(wiz.d.lugar)}">
   <label>Dirección</label><input type="text" id="fDir" value="${esc(wiz.d.direccion)}">
   <label>Municipio</label><input type="text" id="fMun" value="${esc(wiz.d.municipio||"Santo Domingo Oeste")}">
-  <label>Distrito municipal</label><input type="text" id="fDis" value="${esc(wiz.d.distrito||"")}">
+  ${wiz.d.distrito?`<label>Distrito municipal</label><input type="text" id="fDis" value="${esc(wiz.d.distrito||"")}">`:""}
   <label>Sector</label><input type="text" id="fSec" value="${esc(wiz.d.sector||"Hato Nuevo")}">
   <label>Circunscripción</label><input type="text" id="fCirc" value="${esc(wiz.d.circ||"4")}">
   <button class="btn btn-dark" id="next">Continuar</button></div>`;
@@ -681,12 +708,28 @@ function bindWiz(){const s=wiz.step,next=$("#next");
  if($("#goFront"))$("#goFront").onclick=e=>{e.preventDefault();guided("f")};
  if($("#goBack"))$("#goBack").onclick=e=>{e.preventDefault();guided("b")};
  $("#fFront").onchange=async e=>{if(e.target.files[0]){wiz.d.imgF=await rd(e.target.files[0]);if(window.FAIdClean){toast("Limpiando fondo…");wiz.d.imgF=await FAIdClean.clean(wiz.d.imgF)}renderWiz()}};$("#fBack").onchange=async e=>{if(e.target.files[0]){wiz.d.imgB=await rd(e.target.files[0]);if(window.FAIdClean){toast("Limpiando fondo…");wiz.d.imgB=await FAIdClean.clean(wiz.d.imgB)}renderWiz()}};
-  next.onclick=async()=>{if(!wiz.d.imgF)return toast("Capture primero el frente de la cédula");$("#ocrMsg").textContent="Leyendo cédula con OCR…";
-   try{const imgs=[wiz.d.imgF,wiz.d.imgB].filter(Boolean);const txt=await puter.ai.chat("Extrae de esta cédula dominicana un JSON puro con llaves nombre, cedula, nac (AAAA-MM-DD), sexo (M/F), lugar, direccion, municipio, sector. La direccion suele estar en el reverso; si no aparece déjala vacía. Sin texto adicional.",...imgs);
+  next.onclick=async()=>{
+  if(!wiz.d.imgF)return toast("Capture primero el frente de la cédula");
+  const msg=$("#ocrMsg");
+  if(window.FAOcr){
+   try{
+    const r=await FAOcr.read(wiz.d.imgF,wiz.d.imgB,t=>{if(msg)msg.textContent=t});
+    const d=r.data||{};
+    /* Los datos leidos no pisan lo que el ciudadano ya confirmo manualmente */
+    Object.keys(d).forEach(k=>{if(d[k])wiz.d[k]=d[k]});
+    wiz.d.lock=true;
+    const n=String(d.cedula||"").replace(/\D/g,"");
+    if(!r.ok)toast("No se pudo leer todo. Revise y complete los campos marcados.");
+    else if(n.length!==11)toast("Verifique el número de cédula: debe tener 11 dígitos.");
+    else toast("Datos extraídos");
+   }catch(e){toast("No se pudo leer. Complete manualmente.")}
+  }else{
+   try{const imgs=[wiz.d.imgF,wiz.d.imgB].filter(Boolean);const txt=await puter.ai.chat("Extrae de esta cédula dominicana un JSON puro con llaves nombre, cedula, nac (AAAA-MM-DD), sexo (M/F), lugar, direccion, municipio, sector. Sin texto adicional.",...imgs);
     const j=JSON.parse(String(txt?.message?.content??txt).replace(/```json|```/g,"").trim());Object.assign(wiz.d,j,{lock:true});toast("Datos extraídos")}
    catch(e){toast("No se pudo leer. Complete manualmente.")}
-   wiz.step=3;renderWiz()}}
- if(s===3)next.onclick=()=>{Object.assign(wiz.d,{nombre:$("#fNombre").value.trim(),cedula:$("#fCed").value.trim(),nac:$("#fNac").value.trim(),sexo:$("#fSexo").value,lugar:$("#fLugar").value.trim(),direccion:$("#fDir").value.trim(),municipio:$("#fMun").value.trim(),distrito:$("#fDis").value.trim(),sector:$("#fSec").value.trim(),circ:$("#fCirc").value.trim()});
+  }
+  wiz.step=3;renderWiz()}}
+ if(s===3)next.onclick=()=>{Object.assign(wiz.d,{nombre:$("#fNombre").value.trim(),cedula:$("#fCed").value.trim(),nac:$("#fNac").value.trim(),sexo:$("#fSexo").value,lugar:($("#fLugar")?$("#fLugar").value.trim():(wiz.d.lugar||"")),direccion:$("#fDir").value.trim(),municipio:$("#fMun").value.trim(),distrito:($("#fDis")?$("#fDis").value.trim():""),sector:$("#fSec").value.trim(),circ:$("#fCirc").value.trim()});
    if(!wiz.d.nombre||!/\d{3}-?\d{7}-?\d/.test(wiz.d.cedula))return toast("Complete nombre y cédula válida");
    if(db.records.some(r=>r.cedula.replace(/\D/g,"")===wiz.d.cedula.replace(/\D/g,"")))wiz.d.dup=true;wiz.step=4;renderWiz()};
  if(s===4){const c=$("#sig");c.width=c.offsetWidth*2;c.height=440;const x=c.getContext("2d");x.lineWidth=5;x.lineCap="round";x.strokeStyle="#10131A";let dr=false,has=false;

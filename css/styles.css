@@ -389,9 +389,9 @@ html,body{overscroll-behavior-y:auto}
 /* ===== v11 ===== */
 /* 1) migas flotantes dentro del mapa, esquina superior derecha */
 .covwrap2{position:relative}
-.covfloat{position:absolute;top:10px;right:10px;z-index:500;max-width:calc(100% - 70px);display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
-.covfloat .covtrail{pointer-events:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:2px 6px;margin:0;padding:7px 11px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 14px rgba(16,19,26,.14);font-size:13px;backdrop-filter:blur(6px)}
-.covfloat .cc{font-size:13px;padding:1px 0}
+.covfloat{position:absolute;top:10px;left:10px;right:10px;z-index:500;max-width:calc(100% - 20px);display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
+.covfloat .covtrail{pointer-events:auto;display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:2px 6px;margin:0;padding:7px 11px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 14px rgba(16,19,26,.14);font-size:13px;backdrop-filter:blur(6px)}
+.covfloat .cc{font-size:13px;padding:1px 0;text-align:left}
 .covfloat .covback{pointer-events:auto;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:12.5px;text-decoration:none;box-shadow:0 3px 10px rgba(16,19,26,.12)}
 .homewrap .covwrap2{height:calc(100vh - 330px)}
 /* KPI en blanco y margen simetrico: el mismo margen a ambos lados de la fila */
@@ -443,5 +443,29 @@ html,body{overscroll-behavior-y:auto}
 @media(min-width:900px){.rcbar{grid-template-columns:1fr 220px 200px!important}}
 
 /* boton de captura guiada dentro de las tarjetas de cedula */
-.camgo{margin-top:10px;padding:13px 20px;border-radius:16px;border:0;background:var(--ink);color:#fff;font-family:inherit;font-size:15.5px;font-weight:600;cursor:pointer;width:100%;max-width:320px}
+.camgo{margin-top:10px;padding:13px 20px;border-radius:16px;border:1px solid #E1E4EA;background:#F1F2F5;color:#3A3F4A;font-family:inherit;font-size:15.5px;font-weight:600;cursor:pointer;width:100%;max-width:320px}
 .camgo:active{transform:scale(.98)}
+
+/* dialogos de confirmacion */
+.cfm{max-width:420px!important;padding:26px 22px 20px!important;text-align:center}
+.cfm-ico{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;margin:0 auto 14px}
+.cfm-ico.red{background:#FCE9E8;color:#B3261E}
+.cfm-ico.ok{background:#E3F7EE;color:#0A7A52}
+.cfm-t{font-size:20px;margin:0 0 8px}
+.cfm-x{font-size:15px;color:#6B7280;line-height:1.45;margin:0}
+.cfm-n{margin-top:12px;font-size:16px;font-weight:700;color:var(--ink);background:#F7F8FA;border:1px solid var(--line);border-radius:14px;padding:11px 14px;overflow-wrap:anywhere}
+.cfm-b{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.cfm-b .btn{height:52px;font-size:16px}
+
+/* barras en dos columnas lado a lado (movil) */
+.fsrow,.rcrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fsrow input,.fsrow select,.rcrow input,.rcrow select{width:100%;margin-top:0!important;min-width:0}
+@media(min-width:900px){
+ .fsbar .fsrow{display:contents}
+ .rcbar .rcrow{display:contents}
+}
+
+/* banda blanca en la esquina inferior del mapa (cubre la atribucion de Leaflet) */
+.mapfoot{position:absolute;left:0;right:0;bottom:0;height:26px;background:#fff;z-index:600;pointer-events:none;box-shadow:0 -1px 0 rgba(16,19,26,.06);display:flex;align-items:center;justify-content:flex-end;padding-right:10px}
+.mapfoot span{font-size:10.5px;color:#B6BBC4;letter-spacing:.02em}
+.mapwrap .leaflet-bottom{bottom:26px}
