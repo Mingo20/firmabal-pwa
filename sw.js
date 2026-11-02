@@ -1,4 +1,4 @@
-const CACHE='firmabal-v12';
+const CACHE='firmabal-v13';
 const ASSETS=['./','./index.html','./css/styles.css','./js/app.js','./js/sync.js','./js/saas.js','./js/notif.js','./js/idclean.js','./js/camguide.js','./js/ocr.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/logo-badge-96.png','./icons/icon-maskable-512.png','./icons/logo-badge-256.png','./icons/logo-white-256.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});

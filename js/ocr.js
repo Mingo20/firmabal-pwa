@@ -132,9 +132,61 @@ No inventes valores. No agregues claves nuevas.`;
 Concéntrate en la linea del nombre (letras mayusculas) y en el numero de 11 digitos, que suele estar junto al apellido o bajo el nombre.
 nombre en MAYUSCULAS sin numeros. cedula con formato 000-0000000-0. nac en AAAA-MM-DD. sexo M o F. lugar de nacimiento o cadena vacia. Sin texto extra.`;
 
+  /* ---------- 3b. Modelo de lectura ----------
+     DeepSeek via puter.js: el costo corre a nombre del usuario que usa la app (cada quien su cuenta Puter),
+     no del dueno del proyecto. Si DeepSeek no esta disponible para esa cuenta, cae a los modelos
+     multimodales de respaldo sin interrumpir la captura. */
+  /* DeepSeek (via puter.js) estructura los datos. DeepSeek es un modelo de texto: no lee imagenes,
+     asi que la imagen la transcribe un modelo de vision y DeepSeek ordena, corrige e interpreta el texto.
+     Cada usuario paga su propio consumo con su cuenta Puter. */
+  const VISION_MODELS = ["google/gemini-2.5-flash", "gpt-5-nano", "claude-sonnet-4"];
+  const REASON_MODEL = "deepseek-chat";
+  let lastModel = "";
+
+  const text = (r) => String((r && r.message && r.message.content) || r || "");
+
+  async function vision(prompt, img) {
+    let err = null;
+    for (const m of VISION_MODELS) {
+      try {
+        const r = await puter.ai.chat(prompt, [img], false, { model: m });
+        lastModel = m;
+        const t = text(r).trim();
+        if (t) return t;
+      } catch (e) { err = e; }
+    }
+    throw err || new Error("vision no disponible");
+  }
+
+  async function reason(prompt) {
+    try {
+      const r = await puter.ai.chat(prompt, false, { model: REASON_MODEL });
+      lastModel = REASON_MODEL;
+      return parse(text(r));
+    } catch (e) { return null; }
+  }
+
+  /* Dos etapas: transcribir la imagen y luego estructurar con DeepSeek. */
   async function ask(prompt, imgs) {
-    const r = await puter.ai.chat(prompt, ...imgs);
-    return parse(r);
+    const img = (imgs || [])[0];
+    if (!img) throw new Error("sin imagen");
+    const raw = await vision(prompt, img);
+    const structured = await reason(
+      "Eres un extractor de datos de cedulas dominicanas. " +
+      "Recibes una transcripcion OCR y devuelves SOLO el JSON que se pide, sin explicaciones.\n\n" +
+      "TRANSCRIPCION:\n" + raw + "\n\n" +
+      prompt.replace(/^[\s\S]*?JSON/i, "Devuelve SOLO JSON")
+    );
+    const fromVision = parse(raw);
+    if (structured && Object.keys(structured).length) {
+      return Object.assign({}, fromVision, structured);
+    }
+    if (fromVision && Object.keys(fromVision).length) return fromVision;
+    /* Sin DeepSeek y sin JSON en la transcripcion: se le pide el JSON directamente al modelo de vision. */
+    try {
+      const direct = await vision(prompt, img);
+      return parse(direct);
+    } catch (e) { return {}; }
   }
 
   /* ---------- 4. Lectura completa ---------- */

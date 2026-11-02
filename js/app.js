@@ -244,7 +244,7 @@ function vEquipo(){const s=stats();const live=!!db.collector.sharing;
   <div class="kcard"><div class="ico">${ico("audit",20,1.8)}</div><b>${s.pen}</b><span class="kcard-l">Por validar</span></div>
  </div>
  <button class="fab ${live?"live":""}" id="shareLoc" title="${live?"Dejar de compartir ubicación":"Compartir mi ubicación en vivo"}" aria-label="Ubicación en vivo"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.500-5.700-6.500-10.800a6.500 6.500 0 0 1 13 0C18.500 15.300 12 21 12 21z"/><circle cx="12" cy="10.200" r="2.400"/></svg></button>`;
- map=L.map("map",{zoomControl:true}).setView([18.4861,-69.9312],11);
+ map=L.map("map",{zoomControl:true,attributionControl:false}).setView([18.4861,-69.9312],11);
  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(map);
  try{const mw=document.getElementById("map");if(mw&&!mw.querySelector(".mapfoot")){const f=document.createElement("div");f.className="mapfoot";f.innerHTML="<span>© OpenStreetMap</span>";mw.appendChild(f)}}catch(e){}
  db.records.filter(r=>r.lat).forEach(r=>L.circleMarker([r.lat,r.lng],{radius:9,color:"#10131A",fillColor:r.estado==="verificado"?"#0B9D6B":"#E8A317",fillOpacity:.9}).addTo(map).bindPopup(`<b>${esc(r.nombre)}</b><br>${esc(r.sector)} · Circ. ${esc(r.circ)}`));
@@ -302,8 +302,8 @@ async function prepImgs(r){const o=Object.assign({},r);for(const k of ["firma","
 function askConfirm(opts){
  return new Promise(res=>{
   const o=Object.assign({title:"Confirmar",text:"",ok:"Confirmar",cancel:"Cancelar",danger:true},opts||{});
-  const wrap=document.createElement("div");wrap.className="dmask sheet-mask";
-  wrap.innerHTML=`<section class="dsheet sheet cfm">
+  const wrap=document.createElement("div");wrap.className="dmask sheet-mask cfm-wrap";
+  wrap.innerHTML=`<section class="dsheet sheet cfm" style="z-index:1210!important">
    <div class="cfm-ico ${o.danger?"red":"ok"}">
     ${o.danger?'<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.6 17.4A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.6L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>':'<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'}
    </div>
@@ -357,17 +357,17 @@ function tDona(items,title){
  const arcs=items.slice(0,8).map(([k,n],i)=>{const a=n/tot*Math.PI*2,a2=ang+a;
   const x1=C+R*Math.cos(ang),y1=C+R*Math.sin(ang),x2=C+R*Math.cos(a2),y2=C+R*Math.sin(a2),x3=C+r*Math.cos(a2),y3=C+r*Math.sin(a2),x4=C+r*Math.cos(ang),y4=C+r*Math.sin(ang);
   const big=a>Math.PI?1:0;const d=items.length===1?`M${C} ${C-R}A${R} ${R} 0 1 1 ${C-.01} ${C-R}L${C-.01} ${C-r}A${r} ${r} 0 1 0 ${C} ${C-r}Z`:`M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 ${big} 0 ${x4} ${y4}Z`;
-  ang=a2;return `<path d="${d}" fill="${TPAL[i%TPAL.length]}" stroke="#fff" stroke-width="1.5" class="tseg" data-t="${esc(k)}: ${n} (${Math.round(n/tot*100)}%)"/>`}).join("");
+  ang=a2;return `<path d="${d}" fill="${TPAL[i%TPAL.length]}" stroke="#fff" stroke-width="1.5" class="tseg" data-t="${esc(k)}: ${n} (${Math.round(n/tot*100)}%)" data-l="${esc(k)}" data-v="${n}" data-p="${Math.round(n/tot*100)}"/>`}).join("");
  return `<div class="tdona"><svg viewBox="0 0 200 200" width="100%" style="max-width:240px;display:block;margin:0 auto">${arcs}<text x="100" y="97" text-anchor="middle" font-size="26" font-weight="700" fill="#10131A">${tot}</text><text x="100" y="116" text-anchor="middle" font-size="11" fill="#8A909C">${title}</text></svg>
   <div class="tleg">${items.slice(0,8).map(([k,n],i)=>`<span><i style="background:${TPAL[i%TPAL.length]}"></i>${esc(k)} <b>${n}</b></span>`).join("")}</div></div>`}
 function tBarsH(items,color){
  if(!items.length)return `<p class="sub" style="padding:24px 0;text-align:center">Sin datos aún.</p>`;
  const mx=Math.max(1,...items.map(x=>x[1]));
- return `<div class="tbh">${items.map(([k,n])=>`<div class="tbr tseg" data-t="${esc(k)}: ${n} registro${n===1?"":"s"}"><span class="tbl">${esc(k)}</span><div class="tbt"><div class="tbf" style="width:${Math.max(4,n/mx*100)}%;background:${color}"></div></div><b>${n}</b></div>`).join("")}</div>`}
+ return `<div class="tbh">${items.map(([k,n])=>`<div class="tbr tseg" data-t="${esc(k)}: ${n} registro${n===1?"":"s"}" data-l="${esc(k)}" data-v="${n}" data-p="${Math.round(n/mx*100)}"><span class="tbl">${esc(k)}</span><div class="tbt"><div class="tbf" style="width:${Math.max(4,n/mx*100)}%;background:${color}"></div></div><b>${n}</b></div>`).join("")}</div>`}
 function tBarsV(dias,color){
  const mx=Math.max(2,...dias.map(d=>d.n));
  const ticks=[mx,Math.round(mx*.5*10)/10,0];
- return `<div class="tbv"><div class="tbv-y">${ticks.map(t=>`<span>${t}</span>`).join("")}</div><div class="tbv-g">${dias.map((d,i)=>`<div class="tbv-c tseg" data-t="${d.l}: ${d.n} registro${d.n===1?"":"s"}"><div class="tbv-b" style="height:${d.n/mx*100}%;background:${color}"></div><em>${i%2===0||dias.length<8?d.l.slice(0,5):""}</em></div>`).join("")}</div></div>`}
+ return `<div class="tbv"><div class="tbv-y">${ticks.map(t=>`<span>${t}</span>`).join("")}</div><div class="tbv-g">${dias.map((d,i)=>`<div class="tbv-c tseg" data-t="${d.l}: ${d.n} registro${d.n===1?"":"s"}" data-l="${esc(d.l)}" data-v="${d.n}" data-p="${Math.round(d.n/mx*100)}"><div class="tbv-b" style="height:${d.n/mx*100}%;background:${color}"></div><em>${i%2===0||dias.length<8?d.l.slice(0,5):""}</em></div>`).join("")}</div></div>`}
 function tAnillo(pct,label,color){
  const p=Math.max(0,Math.min(100,pct)),R=44,C=2*Math.PI*R;
  return `<div class="tring"><svg viewBox="0 0 120 120" width="116" height="116"><circle cx="60" cy="60" r="${R}" fill="none" stroke="#EEF0F3" stroke-width="12"/><circle cx="60" cy="60" r="${R}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*p/100} ${C}" transform="rotate(-90 60 60)"/><text x="60" y="66" text-anchor="middle" font-size="21" font-weight="700" fill="#10131A">${Math.round(p)}%</text></svg><span>${label}</span></div>`}
@@ -379,7 +379,14 @@ function vTerr(){
  const ITR='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#3A3F4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>';
  const IPIE='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#3A3F4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9h9"/><path d="M20.500 15A9 9 0 1 1 9 3.500"/></svg>';
  view.innerHTML=`<div class="pad tpanel">
-  <div class="tsum"><div><small>Registros</small><b>${T.total}</b></div><div><small>Provincias</small><b>${T.prov.filter(x=>x[0]!=="Sin ubicar").length}</b></div><div><small>Municipios</small><b>${T.mun.filter(x=>x[0]!=="Sin municipio").length}</b></div><div><small>Sectores</small><b>${T.sec.length}</b></div></div>
+  <div class="tsum" id="tsum">
+  <div><small>Registros</small><b>${T.total}</b></div>
+  <div><small>Provincias</small><b>${T.prov.filter(x=>x[0]!=="Sin ubicar").length}</b></div>
+  <div><small>Municipios</small><b>${T.mun.filter(x=>x[0]!=="Sin municipio").length}</b></div>
+  <div><small>Sectores</small><b>${T.sec.length}</b></div>
+  <div><small>Validados</small><b>${val}</b></div>
+  <div><small>Progreso</small><b>${Math.min(100,Math.round(T.total/meta*100))}%</b></div>
+ </div>
   <div class="tgrid2">
    ${card(IPIE,"Distribución por provincia",tDona(T.prov,"registros"))}
    ${card(IPIN,"Registros por provincia",tBarsH(T.prov.slice(0,8),"#E8A317"))}
@@ -390,9 +397,30 @@ function vTerr(){
    ${card(ITR,"Progreso",`<div class="tprog">${tAnillo(T.total?val/T.total*100:0,"Validados","#0B9D6B")}${tAnillo(Math.min(100,T.total/meta*100),"Avance hacia la meta ("+T.total+"/"+meta+")","#10131A")}${tAnillo(T.total?dup/T.total*100:0,"Duplicados","#E8A317")}</div>`)}
   </div></div><div class="ttip" id="ttip" hidden></div>`;
  const tip=$("#ttip");
- $$(".tseg",view).forEach(el=>{const show=e=>{const t=el.getAttribute("data-t");if(!t)return;tip.textContent=t;tip.hidden=false;const x=(e.touches?e.touches[0].clientX:e.clientX),y=(e.touches?e.touches[0].clientY:e.clientY);tip.style.left=Math.min(window.innerWidth-170,Math.max(10,x-60))+"px";tip.style.top=Math.max(10,y-58)+"px"};
-  el.addEventListener("click",show);el.addEventListener("mousemove",show);el.addEventListener("mouseleave",()=>tip.hidden=true)});
- document.addEventListener("click",e=>{if(!e.target.closest||!e.target.closest(".tseg"))tip.hidden=true},{once:false,capture:false})}
+ /* Tooltip premium: etiqueta, valor y proporcion, con entrada suave y sin salirse de pantalla */
+ const showTip=(el,e)=>{
+  const l=el.getAttribute("data-l"),v=el.getAttribute("data-v"),p=el.getAttribute("data-p");
+  if(l==null&&!el.getAttribute("data-t")){tip.hidden=true;return}
+  const name=l!=null?l:(el.getAttribute("data-t")||"").split(":")[0];
+  const value=v!=null?v:((el.getAttribute("data-t")||"").split(":")[1]||"").trim();
+  tip.innerHTML=`<span class="tt-l">${esc(name)}</span><span class="tt-v">${esc(String(value))}</span>${p!=null?`<span class="tt-b"><i style="width:${Math.max(3,Math.min(100,Number(p)||0))}%"></i></span><span class="tt-p">${esc(String(p))}% del total</span>`:""}`;
+  tip.hidden=false;tip.classList.add("on");
+  const px=(e.touches?e.touches[0].clientX:e.clientX),py=(e.touches?e.touches[0].clientY:e.clientY);
+  const tw=tip.offsetWidth||180,th=tip.offsetHeight||60;
+  let x=px+14,y=py-th-14;
+  if(x+tw>window.innerWidth-10)x=px-tw-14;
+  if(x<10)x=10;
+  if(y<10)y=py+18;
+  tip.style.left=x+"px";tip.style.top=y+"px";
+ };
+ $$(".tseg",view).forEach(el=>{
+  el.addEventListener("click",e=>showTip(el,e));
+  el.addEventListener("mousemove",e=>showTip(el,e));
+  el.addEventListener("mouseenter",e=>showTip(el,e));
+  el.addEventListener("touchstart",e=>showTip(el,e),{passive:true});
+  el.addEventListener("mouseleave",()=>{tip.classList.remove("on");tip.hidden=true});
+ });
+ document.addEventListener("click",e=>{if(!e.target.closest||!e.target.closest(".tseg")){tip.classList.remove("on");tip.hidden=true}},{once:false,capture:false})}
 
 function terrDetalle(k){
  const rs=db.records.filter(r=>((r.municipio+" · "+r.sector+" · Circ. "+r.circ)===k));
